@@ -1,0 +1,23 @@
+{
+    "name" : "node-cassandra-client",
+    "version" : "0.0.1",
+    "description" : "High-level Node.js client library for Cassandra", 
+    "main" : "./index",
+    "keywords" : [
+        "cassandra",
+        "client"
+    ],
+    "author" : {
+        "name" : "Gary Dusbabek",
+        "email" : "gdusbabek@gmail.com",
+    },
+    "license" : "don't know yet",
+    "engine" : ["node >= 0.4.0"],
+    "dependencies" : {
+        "thrift" : ">= 0.6.0"
+    },
+	"directories" : {
+		"lib" : "./lib"
+	}
+
+}
