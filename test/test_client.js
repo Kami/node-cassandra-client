@@ -1,9 +1,9 @@
 var assert = require('assert');
 var console = require('console');
-var Keyspace = require('../index').Keyspace;
-var System = require('../index').System;
-var KsDef = require('../index').KsDef;
-var CfDef = require('../index').CfDef;
+var Keyspace = require('../node-cassandra-client').Keyspace;
+var System = require('../node-cassandra-client').System;
+var KsDef = require('../node-cassandra-client').KsDef;
+var CfDef = require('../node-cassandra-client').CfDef;
 var Pool = require('../lib/pool').Pool;
 
 /**

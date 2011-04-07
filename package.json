@@ -2,7 +2,7 @@
     "name" : "node-cassandra-client",
     "version" : "0.0.1",
     "description" : "High-level Node.js client library for Cassandra", 
-    "main" : "./index",
+    "main" : "./node-cassanda-client",
     "keywords" : [
         "cassandra",
         "client"
