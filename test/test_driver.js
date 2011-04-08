@@ -21,7 +21,7 @@ function stringToHex(s, quote) {
 
 function maybeCreateKeyspace(callback) {
   var sys = new System('127.0.0.1:9160');
-  var ksName = 'Keyspace2';
+  var ksName = 'Keyspace1';
   var close = function() {
     sys.close(function() {
       sys.close();
@@ -31,8 +31,12 @@ function maybeCreateKeyspace(callback) {
   sys.describeKeyspace(ksName, function(err, ksDef) {
     if (err) {
       var standard1 = new CfDef({keyspace: ksName, name: 'Standard1', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type'});
+      var cfInt = new CfDef({keyspace: ksName, name: 'CfInt', column_type: 'Standard', comparator_type: 'IntegerType', default_validation_class: 'IntegerType', key_validation_class: 'IntegerType'});
+      var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
+      var cfLong = new CfDef({keyspace: ksName, name: 'CfLong', column_type: 'Standard', comparator_type: 'LongType', default_validation_class: 'LongType', key_validation_class: 'LongType'});
+      var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', replication_factor:1, cf_defs: [standard1, super1]});
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', replication_factor:1, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes]});
       sys.addKeyspace(keyspace1, function(err) {
         close();
         if (err) {
@@ -55,7 +59,7 @@ exports['setUp'] = function(callback) {
 };
 
 exports['testInvalidUpdate'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace2');
+  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
   var stmt = con.createStatement();
   stmt.update('select \'cola\' from Standard1 where key=' + stringToHex('key0', true), function(err) {
     con.close();
@@ -64,7 +68,7 @@ exports['testInvalidUpdate'] = function() {
 };
 
 exports['testSimpleUpdate'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace2');
+  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
   var stmt = con.createStatement();
   var key = stringToHex('key0', true);
   stmt.update('update Standard1 set \'cola\'=\'valuea\', \'colb\'=\'valueb\' where key=' + key, function(updateErr) {
@@ -89,7 +93,7 @@ exports['testSimpleUpdate'] = function() {
 };
 
 exports['testSimpleDelete'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace2');
+  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
   var stmt = con.createStatement();
   var key = stringToHex('key1', true);
   stmt.update('update Standard1 set \'colx\'=\'xxx\', \'colz\'=\'bbb\' where key=' + key, function(updateErr) {
