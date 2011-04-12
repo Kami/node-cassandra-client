@@ -1,6 +1,9 @@
 
 var assert = require('assert');
 var console = require('console');
+
+var BigInteger = require('../lib/bigint').BigInteger;
+
 var Connection = require('../lib/driver').Connection;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
@@ -80,12 +83,14 @@ exports['testSimpleUpdate'] = function() {
   stmt.update('update Standard1 set \'cola\'=\'valuea\', \'colb\'=\'valueb\' where key=' + key, function(updateErr) {
     if (updateErr) {
       con.close();
-      assert.ok(false, updateErr);
+      throw new Error(updateErr);
     }
     // verify the query succeeded.
     stmt.query('select \'cola\', \'colb\' from Standard1 where key=' + key, function(selectErr, res) {
       con.close();
-      assert.equal(null, selectErr);
+      if (selectErr) {
+        throw new Error(selectErr);
+      }
       assert.ok(res.next());
       assert.equal('valuea', res.getByIndex(0).value);
       assert.equal('cola', res.getByIndex(0).name);
@@ -105,11 +110,13 @@ exports['testSimpleDelete'] = function() {
   stmt.update('update Standard1 set \'colx\'=\'xxx\', \'colz\'=\'bbb\' where key=' + key, function(updateErr) {
     if (updateErr) {
       con.close();
-      assert.ok(false, updateErr);
+      throw new Error(updateErr);
     }
     stmt.update('delete \'colx\', \'colz\' from Standard1 where key=' + key, function(deleteErr) {
       con.close();
-      assert.ifError(deleteErr);
+      if (deleteErr) {
+        throw new Error(deleteErr);
+      }
     });
   });
 };
@@ -120,12 +127,14 @@ exports['testLong'] = function() {
   stmt.update('update CfLong set \'1\'=\'2\', \'3\'=\'4\' where key=\'12345\'', function(updateErr) {
     if (updateErr) {
       con.close();
-      assert.ok(false, updateErr);
+      throw new Error(updateErr);
     } else {
       stmt.query('select \'1\', \'3\' from CfLong where key=\'12345\'', function(selectErr, res) {
         con.close();
+        if (selectErr) {
+          throw new Error(selectErr);
+        }
         assert.ok(res.next());
-        assert.equal(null, selectErr);
         
         // getting by index is easy.
         assert.equal(1, res.getByIndex(0).name);
@@ -143,8 +152,43 @@ exports['testLong'] = function() {
   });
 };
 
-// this is for running some of the tests outside of whiskey.
+exports['testInt'] = function() {
+  var con = connect();
+  var stmt = con.createStatement();
+  // make sure to use some numbers that will overflow a 64 bit signed value.
+  stmt.update('update CfInt set \'1\'=\'11\', \'-1\'=\'-11\', \'8776496549718567867543025521\'=\'-8776496549718567867543025521\' where key=\'3456543434345654345332453455633\'', function(updateErr) {
+    if (updateErr) {
+      con.close();
+      throw new Error(updateErr);
+    } else {
+      stmt.query('select \'-1\', \'1\', \'8776496549718567867543025521\' from CfInt where key=\'3456543434345654345332453455633\'', function(selectErr, res) {
+        con.close();
+        if (selectErr) {
+          throw new Error(selectErr);
+        }
+        assert.ok(res.next());
+        
+        // by index
+        assert.ok(new BigInteger('-1').equals(res.getByIndex(0).name));
+        assert.ok(new BigInteger('-11').equals(res.getByIndex(0).value));
+        assert.ok(new BigInteger('1').equals(res.getByIndex(1).name));
+        assert.ok(new BigInteger('11').equals(res.getByIndex(1).value));
+        assert.ok(new BigInteger('8776496549718567867543025521').equals(res.getByIndex(2).name));
+        assert.ok(new BigInteger('-8776496549718567867543025521').equals(res.getByIndex(2).value));
+        
+        // by name
+        assert.ok(new BigInteger('-11').equals(res.getByName(new BigInteger('-1'))));
+        assert.ok(new BigInteger('11').equals(res.getByName(new BigInteger('1'))));
+        assert.ok(new BigInteger('-8776496549718567867543025521').equals(res.getByName(new BigInteger('8776496549718567867543025521'))));
+        
+        
+        assert.ok(!res.next());
+      });
+    }
+  });
+};
+
+//this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
-//  exports['testSimpleUpdate']();
-//  exports['testLong']();
+//  exports['testInt']();
 //});
