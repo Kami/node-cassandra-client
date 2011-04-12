@@ -28,19 +28,21 @@ function maybeCreateKeyspace(callback) {
       console.log('System keyspace closed');
     });
   };
-  sys.describeKeyspace(ksName, function(err, ksDef) {
-    if (err) {
+  sys.describeKeyspace(ksName, function(descErr, ksDef) {
+    if (descErr) {
+      console.log('adding test keyspace');
       var standard1 = new CfDef({keyspace: ksName, name: 'Standard1', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type'});
+      var cfLong = new CfDef({keyspace: ksName, name: 'CfLong', column_type: 'Standard', comparator_type: 'LongType', default_validation_class: 'LongType', key_validation_class: 'LongType'});
       var cfInt = new CfDef({keyspace: ksName, name: 'CfInt', column_type: 'Standard', comparator_type: 'IntegerType', default_validation_class: 'IntegerType', key_validation_class: 'IntegerType'});
       var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
-      var cfLong = new CfDef({keyspace: ksName, name: 'CfLong', column_type: 'Standard', comparator_type: 'LongType', default_validation_class: 'LongType', key_validation_class: 'LongType'});
       var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', replication_factor:1, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes]});
-      sys.addKeyspace(keyspace1, function(err) {
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes]});
+      sys.addKeyspace(keyspace1, function(addErr) {
+        console.log(addErr);
         close();
-        if (err) {
-          assert.ifError(err);
+        if (addErr) {
+          assert.ifError(addErr);
         } else {
           console.log('keyspace created');
           callback();
@@ -54,12 +56,16 @@ function maybeCreateKeyspace(callback) {
   });
 }
 
+function connect() {
+  return new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
+}
+
 exports['setUp'] = function(callback) {
   maybeCreateKeyspace(callback);
 };
 
 exports['testInvalidUpdate'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
+  var con = connect();
   var stmt = con.createStatement();
   stmt.update('select \'cola\' from Standard1 where key=' + stringToHex('key0', true), function(err) {
     con.close();
@@ -68,7 +74,7 @@ exports['testInvalidUpdate'] = function() {
 };
 
 exports['testSimpleUpdate'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
+  var con = connect();
   var stmt = con.createStatement();
   var key = stringToHex('key0', true);
   stmt.update('update Standard1 set \'cola\'=\'valuea\', \'colb\'=\'valueb\' where key=' + key, function(updateErr) {
@@ -93,7 +99,7 @@ exports['testSimpleUpdate'] = function() {
 };
 
 exports['testSimpleDelete'] = function() {
-  var con = new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
+  var con = connect();
   var stmt = con.createStatement();
   var key = stringToHex('key1', true);
   stmt.update('update Standard1 set \'colx\'=\'xxx\', \'colz\'=\'bbb\' where key=' + key, function(updateErr) {
@@ -107,3 +113,38 @@ exports['testSimpleDelete'] = function() {
     });
   });
 };
+
+exports['testLong'] = function() {
+  var con = connect();
+  var stmt = con.createStatement();
+  stmt.update('update CfLong set \'1\'=\'2\', \'3\'=\'4\' where key=\'12345\'', function(updateErr) {
+    if (updateErr) {
+      con.close();
+      assert.ok(false, updateErr);
+    } else {
+      stmt.query('select \'1\', \'3\' from CfLong where key=\'12345\'', function(selectErr, res) {
+        con.close();
+        assert.ok(res.next());
+        assert.equal(null, selectErr);
+        
+        // getting by index is easy.
+        assert.equal(1, res.getByIndex(0).name);
+        assert.equal(2, res.getByIndex(0).value);
+        assert.equal(3, res.getByIndex(1).name);
+        assert.equal(4, res.getByIndex(1).value);
+        
+        // getting by column name is harder.
+        assert.equal(2, res.getByName(1));
+        assert.equal(4, res.getByName(3));
+        
+        assert.ok(!res.next());
+      });
+    }
+  });
+};
+
+// this is for running some of the tests outside of whiskey.
+//maybeCreateKeyspace(function() {
+//  exports['testSimpleUpdate']();
+//  exports['testLong']();
+//});
