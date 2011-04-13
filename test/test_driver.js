@@ -39,8 +39,9 @@ function maybeCreateKeyspace(callback) {
       var cfInt = new CfDef({keyspace: ksName, name: 'CfInt', column_type: 'Standard', comparator_type: 'IntegerType', default_validation_class: 'IntegerType', key_validation_class: 'IntegerType'});
       var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
       var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
+      var cfUuid = new CfDef({keyspace: ksName, name: 'CfUuid', column_type: 'Standard', comparator_type: 'TimeUUIDType', default_validation_class: 'TimeUUIDType', key_validation_class: 'TimeUUIDType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes]});
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
         close();
@@ -186,6 +187,38 @@ exports['testInt'] = function() {
         assert.ok(new BigInteger('11').equals(res.getByName(new BigInteger('1'))));
         assert.ok(new BigInteger('-8776496549718567867543025521').equals(res.getByName(new BigInteger('8776496549718567867543025521'))));
         
+        assert.ok(!res.next());
+      });
+    }
+  });
+};
+
+exports['testUUID'] = function() {
+  // make sure we're not comparing the same things.
+  assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
+  assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
+  var con = connect();
+  var stmt = con.createStatement();
+  stmt.update('update CfUuid set \'6f8483b0-65e0-11e0-0000-fe8ebeead9fe\'=\'6fd45160-65e0-11e0-0000-fe8ebeead9fe\', \'6fd589e0-65e0-11e0-0000-7fd66bb03aff\'=\'6fd6e970-65e0-11e0-0000-fe8ebeead9fe\' where key=\'fa6a8870-65fa-11e0-0000-fe8ebeead9fd\'', function(updateErr) {
+    if (updateErr) {
+      con.close();
+      throw new Error(updateErr);
+    } else {
+      stmt.query('select \'6f8483b0-65e0-11e0-0000-fe8ebeead9fe\', \'6fd589e0-65e0-11e0-0000-7fd66bb03aff\' from CfUuid where key=\'fa6a8870-65fa-11e0-0000-fe8ebeead9fd\'', function(selectErr, res) {
+        con.close();
+        if (selectErr) {
+          throw new Error(selectErr);
+        }
+        assert.ok(res.next());
+        assert.ok(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(0).name));
+        assert.ok(new UUID('string', '6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(0).value));
+        assert.ok(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(res.getByIndex(1).name));
+        assert.ok(new UUID('string', '6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(1).value));
+        
+        assert.ok(res.getByName(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')).equals(res.getByIndex(1).value));
+        assert.ok(res.getByName(res.getByIndex(0).name).equals(res.getByIndex(0).value));
+        assert.ok(res.getByName(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe')).equals(res.getByIndex(0).value));
+        assert.ok(res.getByName(res.getByIndex(1).name).equals(res.getByIndex(1).value));
         
         assert.ok(!res.next());
       });
@@ -195,5 +228,5 @@ exports['testInt'] = function() {
 
 //this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
-//  exports['testLong']();
+//  exports['testUUID']();
 //});
