@@ -124,12 +124,14 @@ exports['testSimpleDelete'] = function() {
 exports['testLong'] = function() {
   var con = connect();
   var stmt = con.createStatement();
-  stmt.update('update CfLong set \'1\'=\'2\', \'3\'=\'4\' where key=\'12345\'', function(updateErr) {
+  // the third pair is ±2^62, which overflows the 53 bits in the fp mantissa js uses for numbers (should lose precision
+  // coming back), but still fits nicely in an 8-byte long (it should work).
+  stmt.update('update CfLong set \'1\'=\'2\', \'3\'=\'4\', \'4611686018427387904\'=\'-4611686018427387904\' where key=\'12345\'', function(updateErr) {
     if (updateErr) {
       con.close();
       throw new Error(updateErr);
     } else {
-      stmt.query('select \'1\', \'3\' from CfLong where key=\'12345\'', function(selectErr, res) {
+      stmt.query('select \'1\', \'3\', \'4611686018427387904\' from CfLong where key=\'12345\'', function(selectErr, res) {
         con.close();
         if (selectErr) {
           throw new Error(selectErr);
@@ -141,10 +143,13 @@ exports['testLong'] = function() {
         assert.equal(2, res.getByIndex(0).value);
         assert.equal(3, res.getByIndex(1).name);
         assert.equal(4, res.getByIndex(1).value);
+        assert.ok(new BigInteger('4611686018427387904').equals(res.getByIndex(2).name));
+        assert.ok(new BigInteger('-4611686018427387904').equals(res.getByIndex(2).value));
         
         // getting by column name is harder.
         assert.equal(2, res.getByName(1));
         assert.equal(4, res.getByName(3));
+        assert.ok(new BigInteger('-4611686018427387904').equals(res.getByName(new BigInteger('4611686018427387904'))));
         
         assert.ok(!res.next());
       });
@@ -190,5 +195,5 @@ exports['testInt'] = function() {
 
 //this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
-//  exports['testInt']();
+//  exports['testLong']();
 //});
