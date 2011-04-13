@@ -150,4 +150,21 @@ public class TestBigInt {
  */
 };
 
-exports.testBigIntEdges();
+exports['testUUID'] = function() {
+  /* from java:
+  ddf09190-6612-11e0-0000-fe8ebeead9f8->[221,240,145,144,102,18,17,224,0,0,254,142,190,234,217,248,] 
+  ddf0b8a0-6612-11e0-0000-1e4e5d5425fc->[221,240,184,160,102,18,17,224,0,0,30,78,93,84,37,252,]      
+  ddf0b8a1-6612-11e0-0000-90f061abd1ff->[221,240,184,161,102,18,17,224,0,0,144,240,97,171,209,255,]  
+   */
+  var strings = ['ddf09190-6612-11e0-0000-fe8ebeead9f8',
+                 'ddf0b8a0-6612-11e0-0000-1e4e5d5425fc',
+                 'ddf0b8a1-6612-11e0-0000-90f061abd1ff'];
+  var arrays = [[221,240,145,144,102,18,17,224,0,0,254,142,190,234,217,248], 
+                [221,240,184,160,102,18,17,224,0,0,30,78,93,84,37,252],
+                [221,240,184,161,102,18,17,224,0,0,144,240,97,171,209,255]];
+
+  assert.strictEqual(strings.length, arrays.length);
+  for (var i = 0; i < strings.length; i++) {
+    assert.deepEqual(new UUID('string', strings[i]).bytes, arrays[i]);
+  }
+};
