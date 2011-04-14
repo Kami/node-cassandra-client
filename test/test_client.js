@@ -51,34 +51,61 @@ exports['setUp'] = function(callback) {
   maybeCreateKeyspace(callback);
 };
 
+function insert(cf, key, cols, callback) {
+  cf.insert(key, cols, 0, 'ONE', callback);
+}
+
+function cfLong() {
+  return new ColumnFamily('Keyspace1', 'CfLong', null, null, '127.0.0.1', 9160);
+}
+
+function cfUuid() {
+  return new ColumnFamily('Keyspace1', 'CfUuid', null, null, '127.0.0.1', 9160);
+}
+
 /** simple inserts. */
 exports['testLongInsert'] = function() {
-  var CfLong = new ColumnFamily('Keyspace1', 'CfLong', null, null, '127.0.0.1', 9160);
-  CfLong.insert(1, {11:22, 33:44, 55:66}, 0, 'ONE', function(err) {
+  var CfLong = cfLong();
+  insert(CfLong, 1, {11:22, 33:44, 55:66}, function(err) {
     CfLong.close();
     if (err) {
       console.log(err);
       throw new Error(err);
     }
   });
-}
+};
+
+exports['testLongDelete'] = function() {
+  var CfLong = cfLong();
+  var key = 2;
+  insert(CfLong, key, {1:2, 3:4, 5:6, 7:8}, function (updErr) {
+    if (updErr) {
+      CfLong.close();
+      throw new Error(updErr);
+    } else {
+      CfLong.remove(key, [1, 3, 5, 7], 'ONE', function(delErr) {
+        CfLong.close();
+        if (delErr) {
+          throw new Error(delErr);
+        }
+      });
+    }
+  });
+};
 
 exports['testUUIDInsert'] = function() {
-  var CfUUID = new ColumnFamily('Keyspace1', 'CfUuid', null, null, '127.0.0.1', 9160);
-  CfUUID.insert('6f8483b0-65e0-11e0-0000-fe8ebeead9fe',
-                {
-                  '6f8483b0-65e0-11e0-0000-fe8ebeead9fe': '6fd45160-65e0-11e0-0000-fe8ebeead9fe',
-                  '6fd589e0-65e0-11e0-0000-7fd66bb03aff': '6fd6e970-65e0-11e0-0000-fe8ebeead9fe'
-                },
-                0, 'ONE', function(err) {
-                            CfUUID.close();
-                            if (err) {
-                              console.log(err);
-                              throw new Error(err);
-                            }
-                          });
+  var CfUUID = cfUuid();
+  var cols = {'6f8483b0-65e0-11e0-0000-fe8ebeead9fe': '6fd45160-65e0-11e0-0000-fe8ebeead9fe',
+              '6fd589e0-65e0-11e0-0000-7fd66bb03aff': '6fd6e970-65e0-11e0-0000-fe8ebeead9fe'};
+  insert(CfUUID, '6f8483b0-65e0-11e0-0000-fe8ebeead9fe', cols, function(err) {
+    CfUUID.close();
+    if (err) {
+      console.log(err);
+      throw new Error(err);
+    }
+  });
 };
 
 //exports.setUp(function() {
-// exports.testSimpleInsert();
+//  exports.testUUIDInsert();
 //});

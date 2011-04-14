@@ -114,13 +114,19 @@ System.prototype.close = function(callback) {
   this.emit('checkq');
 };
 
+function chopTrailingComma(str) {
+  if (str.charAt(str.length - 1) === ',') {
+    str = str.substr(0, str.length - 1);
+  }
+  return str;
+}
+
 // todo: pool connections.
 
 /** ColumnFamily wrapper (uses the CQL driver) */
 ColumnFamily = module.exports.ColumnFamily = function(keyspace, columnFamily, user, pass, host, port) {
   this.connection = new Connection(user, pass, host, port, keyspace);
   this.cfName = columnFamily;
-  this.q = new Queue(10000);
 };
 
 ColumnFamily.prototype.insert = function(key, columns, timestamp, consistency, callback) {
@@ -130,10 +136,21 @@ ColumnFamily.prototype.insert = function(key, columns, timestamp, consistency, c
   for (var name in columns) {
     str += '\'' + name + '\'=\'' + columns[name] + '\',';
   }
-  if (str.charAt(str.length - 1) === ',') {
-    str = str.substr(0, str.length - 1);
-  }
+  str = chopTrailingComma(str);
   str += ' WHERE KEY=\'' + key + '\'';
+  console.log(str);
+  stmt.update(str, callback);
+};
+
+ColumnFamily.prototype.remove = function(key, columns, consistency, callback) {
+  // DELETE [COLUMNS] FROM <COLUMN FAMILY> [USING <CONSISTENCY>] WHERE KEY = keyname1
+  var stmt = this.connection.createStatement();
+  var str = 'DELETE ';
+  for (var i = 0; i < columns.length; i++) {
+    str += '\'' + columns[i] + '\',';
+  }
+  str = chopTrailingComma(str);
+  str += ' FROM ' + this.cfName + ' USING CONSISTENCY ' + consistency + ' WHERE KEY=\'' + key + '\'';
   console.log(str);
   stmt.update(str, callback);
 };
