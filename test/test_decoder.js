@@ -5,14 +5,15 @@ var bytesToLong = require('../lib/decoder').bytesToLong;
 
 exports['testLongConversion'] = function() {
   assert.ok(bytesToLong);
-  assert.equal(1, bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001')); // 1
-  assert.equal(2, bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002')); // 2
-  assert.equal(255 ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ')); // 255
-  assert.equal(2550 ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\tö')); // 2550
-  assert.equal(8025521, bytesToLong('\u0000\u0000\u0000\u0000\u0000zu±')); // 8025521
-  assert.equal(218025521, bytesToLong('\u0000\u0000\u0000\u0000\fþÎ1')); // 218025521
-  assert.equal(-1312133133, bytesToLong('\u0000\u0000\u0005ó±Ên1')); // 6544218025521 unsigned
-  assert.equal(-68262595, bytesToLong('yÌa\u001c²be1')); // 8776496549718025521 unsigned
+  // we have to compare against strings.
+  assert.strictEqual('1', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001').toString()); // 1
+  assert.strictEqual('2', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002').toString()); // 2
+  assert.strictEqual('255' ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ').toString()); // 255
+  assert.strictEqual('2550' ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\tö').toString()); // 2550
+  assert.strictEqual('8025521', bytesToLong('\u0000\u0000\u0000\u0000\u0000zu±').toString()); // 8025521
+  assert.strictEqual('218025521', bytesToLong('\u0000\u0000\u0000\u0000\fþÎ1').toString()); // 218025521
+  assert.strictEqual('6544218025521', bytesToLong('\u0000\u0000\u0005ó±Ên1').toString()); // 6544218025521
+  assert.strictEqual('8776496549718025521', bytesToLong('yÌa\u001c²be1').toString()); // 8776496549718025521
 };
 
 /** make sure sign extension and unsigned/signed conversions don't bite us. */

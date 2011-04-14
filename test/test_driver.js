@@ -140,16 +140,16 @@ exports['testLong'] = function() {
         assert.ok(res.next());
         
         // getting by index is easy.
-        assert.equal(1, res.getByIndex(0).name);
-        assert.equal(2, res.getByIndex(0).value);
-        assert.equal(3, res.getByIndex(1).name);
-        assert.equal(4, res.getByIndex(1).value);
+        assert.equal('1', res.getByIndex(0).name.toString());
+        assert.equal('2', res.getByIndex(0).value.toString());
+        assert.equal('3', res.getByIndex(1).name.toString());
+        assert.equal('4', res.getByIndex(1).value.toString());
         assert.ok(new BigInteger('4611686018427387904').equals(res.getByIndex(2).name));
         assert.ok(new BigInteger('-4611686018427387904').equals(res.getByIndex(2).value));
         
         // getting by column name is harder.
-        assert.equal(2, res.getByName(1));
-        assert.equal(4, res.getByName(3));
+        assert.equal('2', res.getByName(1).toString());
+        assert.equal('4', res.getByName(3).toString());
         assert.ok(new BigInteger('-4611686018427387904').equals(res.getByName(new BigInteger('4611686018427387904'))));
         
         assert.ok(!res.next());
