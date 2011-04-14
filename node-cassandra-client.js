@@ -12,6 +12,8 @@ var Pool = require('./lib/pool').Pool;
 var CfDef = module.exports.CfDef = ttypes.CfDef;
 var KsDef = module.exports.KsDef = ttypes.KsDef;
 
+var Connection = require('./lib/driver').Connection;
+
 /** Naïve FIFO queue */
 function Queue(maxSize) {
   var items = [];
@@ -51,9 +53,12 @@ function Queue(maxSize) {
   };
 }
 
-/** responds to 'checkq' events by draining the work queue */
-RequestWorker = module.exports.RequestWorker = function() {
+/** system database */
+System = module.exports.System = function(urn) {
   EventEmitter.call(this);
+  this.q = new Queue(500);
+  this.pool = new Pool([urn]);
+  
   var self = this;
   this.on('checkq', function() {
     var con = self.pool.getNext();
@@ -70,15 +75,7 @@ RequestWorker = module.exports.RequestWorker = function() {
       }
     }
   });
-};
-sys.inherits(RequestWorker, EventEmitter);
-
-
-/** system database */
-System = module.exports.System = function(urn) {
-  RequestWorker.call(this);
-  this.q = new Queue(500);
-  this.pool = new Pool([urn]);
+  
   this.q.put(function(con) {
     con.thriftCli.set_keyspace('system', function(err) {
       if (err) {
@@ -87,7 +84,7 @@ System = module.exports.System = function(urn) {
     });
   });
 };
-sys.inherits(System, RequestWorker);
+sys.inherits(System, EventEmitter);
 
 /** adds a keyspace */
 System.prototype.addKeyspace = function(ksDef, callback) {
@@ -117,47 +114,30 @@ System.prototype.close = function(callback) {
   this.emit('checkq');
 };
 
+// todo: pool connections.
 
-/** Simple keyspace wrapper */
-Keyspace = module.exports.Keyspace = function(keyspace, urns) {
-  RequestWorker.call(this);
-  var self = this;
-  this.pool = new Pool(urns);
-  this.q = new Queue(100000);
-  
-  // each connection in the queue needs to be told to use the keyspace for this Keyspace instance. But we don't want
-  // work in this Keyspace's queue to be acted on before keyspace can be set in the underlying connection.  The
-  // solution is to dispatch that work to this Keyspace's work queue.  It's a kludge because the function getting
-  // invoked ignores the connection passed to it by the queue worker and uses the one passed in via Pool.forEach.
-  this.pool.forEach(function(con) {
-    self.q.put(function(ignoreCon) {
-      con.thriftCli.set_keyspace(keyspace, function(err) {
-        if (err) {
-          throw new Error(err);
-        }
-      });
-    });
-  });
-  this.emit('checkq');
-};
-sys.inherits(Keyspace, RequestWorker);
-
-/** insert */
-Keyspace.prototype.insert = function(key, cf, superCol, colName, colValue, ts, callback) {
-  this.q.put(function(con) {
-    con.thriftCli.insert(key, new ttypes.ColumnParent({column_family: cf, super_column: superCol}), new ttypes.Column({name: colName, value: colValue, timestamp: ts}), ttypes.ConsistencyLevel.ONE, callback);
-  });
-  this.emit('checkq');
+/** ColumnFamily wrapper (uses the CQL driver) */
+ColumnFamily = module.exports.ColumnFamily = function(keyspace, columnFamily, user, pass, host, port) {
+  this.connection = new Connection(user, pass, host, port, keyspace);
+  this.cfName = columnFamily;
+  this.q = new Queue(10000);
 };
 
-/** closes thrift connection */
-Keyspace.prototype.close = function(callback) {
-  var self = this;
-  this.q.put(function() {
-    self.pool.tearDown();
-    if (callback) {
-      callback();
-    }
-  });
-  this.emit('checkq');
+ColumnFamily.prototype.insert = function(key, columns, timestamp, consistency, callback) {
+  // UPDATE <COLUMN FAMILY> [USING CONSISTENCY <CL>] SET name1 = value1, name2 = value2 WHERE KEY = keyname;
+  var stmt = this.connection.createStatement();
+  var str = 'UPDATE ' + this.cfName + ' USING CONSISTENCY ' + consistency + ' SET ';
+  for (var name in columns) {
+    str += '\'' + name + '\'=\'' + columns[name] + '\',';
+  }
+  if (str.charAt(str.length - 1) === ',') {
+    str = str.substr(0, str.length - 1);
+  }
+  str += ' WHERE KEY=\'' + key + '\'';
+  console.log(str);
+  stmt.update(str, callback);
+};
+
+ColumnFamily.prototype.close = function() {
+  this.connection.close();
 };

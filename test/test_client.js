@@ -1,6 +1,6 @@
 var assert = require('assert');
 var console = require('console');
-var Keyspace = require('../node-cassandra-client').Keyspace;
+var ColumnFamily = require('../node-cassandra-client').ColumnFamily;
 var System = require('../node-cassandra-client').System;
 var KsDef = require('../node-cassandra-client').KsDef;
 var CfDef = require('../node-cassandra-client').CfDef;
@@ -10,9 +10,6 @@ var Pool = require('../lib/pool').Pool;
  * This test assumes you have cassandra running on 127.0.0.1:9160 (of course, other hosts are allowed too).
  */
 
-
-// we'll need these in a bit.
-var client;
 
 /**
  * creates the test keyspace if we need it.
@@ -51,34 +48,37 @@ function maybeCreateKeyspace(callback) {
 
 /** ensures the test keyspace is created */
 exports['setUp'] = function(callback) {
-  client = new Keyspace('Keyspace1', ['127.0.0.1:9160', '127.0.0.2:9160', '127.0.0.3:9160']);
   maybeCreateKeyspace(callback);
 };
 
 /** simple inserts. */
-exports['testSimpleInsert'] =function() {
-  var ts = 0;
-  for (var i = 0; i < 10; i++) {
-    client.insert('key0', 'Standard1', null, 'cola', 'valuea' + ts, ts++, function(err) {
-      assert.ifError(err);
-    });
-  }
-};
-
-/** simple super inserts */
-exports['testSuperInserts'] = function() {
-  var ts = 0;
-  for (i = 0; i < 10; i++) {
-    for (j = 0; j < 10; j++) {
-      client.insert('key0', 'Super1', 'super' + i, 'cola', 'valuea' + ts, ts++, function(err) {
-        assert.ifError(err);
-      });
+exports['testLongInsert'] = function() {
+  var CfLong = new ColumnFamily('Keyspace1', 'CfLong', null, null, '127.0.0.1', 9160);
+  CfLong.insert(1, {11:22, 33:44, 55:66}, 0, 'ONE', function(err) {
+    CfLong.close();
+    if (err) {
+      console.log(err);
+      throw new Error(err);
     }
-  }
+  });
+}
+
+exports['testUUIDInsert'] = function() {
+  var CfUUID = new ColumnFamily('Keyspace1', 'CfUuid', null, null, '127.0.0.1', 9160);
+  CfUUID.insert('6f8483b0-65e0-11e0-0000-fe8ebeead9fe',
+                {
+                  '6f8483b0-65e0-11e0-0000-fe8ebeead9fe': '6fd45160-65e0-11e0-0000-fe8ebeead9fe',
+                  '6fd589e0-65e0-11e0-0000-7fd66bb03aff': '6fd6e970-65e0-11e0-0000-fe8ebeead9fe'
+                },
+                0, 'ONE', function(err) {
+                            CfUUID.close();
+                            if (err) {
+                              console.log(err);
+                              throw new Error(err);
+                            }
+                          });
 };
 
-/** closes the connection */
-exports['tearDown'] = function(callback) {
-  assert.ok(client);
-  client.close(callback);
-};
+//exports.setUp(function() {
+// exports.testSimpleInsert();
+//});
