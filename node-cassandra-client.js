@@ -155,6 +155,49 @@ ColumnFamily.prototype.remove = function(key, columns, consistency, callback) {
   stmt.update(str, callback);
 };
 
+ColumnFamily.prototype.get = function(key, columns, reversed, count, consistency, callback) {
+  var isColList = '[object Array]' === Object.prototype.toString.call(columns);
+//  SELECT [FIRST N] [REVERSED] <SELECT EXPR> FROM <COLUMN FAMILY> [USING <CONSISTENCY>]
+//        [WHERE <CLAUSE>] [LIMIT N];
+  var stmt = this.connection.createStatement();
+  var str = 'SELECT ';
+  if (count) {
+    str += 'FIRST ' + count + ' ';
+  }
+  if (reversed) {
+    str += 'REVERSED ';
+  }
+  if (isColList) {
+    // cherry picked columns.
+    for (var i = 0; i < columns.length; i++) {
+      str += '\'' + columns[i] + '\',';
+    }
+    str = chopTrailingComma(str);
+  } else {
+    // slice.
+    str += '\'' + columns.start + '\'..\'' + columns.finish + '\'';
+  }
+  str += ' FROM ' + this.cfName + ' USING CONSISTENCY ' + consistency + ' WHERE KEY=\'' + key + '\'';
+  console.log(str);
+  stmt.query(str, function(selectErr, res) {
+    if (selectErr) {
+      callback(selectErr, null);
+    } else {
+      var cols = {};
+      if (!res.next()) {
+        cols.size = function() { return 0; };
+        callback(null, cols);
+      } else {
+        for (var i = 0; i < res.colCount(); i++) {
+          cols[res.getByIndex(i).name] = res.getByIndex(i).value;
+        }
+        cols.size = function() { return res.colCount(); };
+        callback(null, cols);
+      }
+    }
+  });
+};
+
 ColumnFamily.prototype.close = function() {
   this.connection.close();
 };

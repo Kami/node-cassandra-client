@@ -93,6 +93,56 @@ exports['testLongDelete'] = function() {
   });
 };
 
+exports['testLongGetSlice'] = function() {
+  var CfLong = cfLong();
+  var key = 3;
+  insert(CfLong, key, {1:2, 3:4, 5:6, 7:8}, function (updErr) {
+    if (updErr) {
+      CfLong.close();
+      throw new Error(updErr);
+    } else {
+      var COL_LIMIT = 3;
+      CfLong.get(key, {start:1, finish:100}, false, COL_LIMIT, 'ONE', function(selectErr, cols) {
+        CfLong.close();
+        if (selectErr) {
+          console.log(selectErr);
+          throw new Error(selectErr);
+        } else {
+          assert.strictEqual(cols.size(), COL_LIMIT);
+          assert.ok(cols[1].equals(new BigInteger('2')));
+          assert.ok(cols[3].equals(new BigInteger('4')));
+          assert.ok(cols[5].equals(new BigInteger('6')));
+        }
+      });
+    }
+  });
+};
+
+exports['testLongGetCols'] = function() {
+  var CfLong = cfLong();
+  var key = 4;
+  insert(CfLong, key, {1:2, 3:4, 5:6, 7:8}, function (updErr) {
+    if (updErr) {
+      CfLong.close();
+      throw new Error(updErr);
+    } else {
+      var COL_LIMIT = 3;
+      CfLong.get(key, [1,5,7], false, COL_LIMIT, 'ONE', function(selectErr, cols) {
+        CfLong.close();
+        if (selectErr) {
+          console.log(selectErr);
+          throw new Error(selectErr);
+        } else {
+          assert.strictEqual(cols.size(), COL_LIMIT);
+          assert.ok(cols[1].equals(new BigInteger('2')));
+          assert.ok(cols[5].equals(new BigInteger('6')));
+          assert.ok(cols[7].equals(new BigInteger('8')));
+        }
+      });
+    }
+  });
+};
+
 exports['testUUIDInsert'] = function() {
   var CfUUID = cfUuid();
   var cols = {'6f8483b0-65e0-11e0-0000-fe8ebeead9fe': '6fd45160-65e0-11e0-0000-fe8ebeead9fe',
@@ -107,5 +157,5 @@ exports['testUUIDInsert'] = function() {
 };
 
 //exports.setUp(function() {
-//  exports.testUUIDInsert();
+//  exports.testLongGetCols();
 //});

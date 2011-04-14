@@ -60,4 +60,39 @@ Maybe your column family uses UUIDs everwhere:
 	                    }
 	                  });
 
-### TODO: select
+### Getting data
+Do a get slice, but only return the first 3 cols, using columns from the insert statement above:
+
+	var cfLong = new ColumnFamily('Keyspace1', 'CfLong', null, null, '127.0.0.1', 9160);
+	cfLong.get(1, {start:1, finish:100}, false, 3, 'ONE', function(err, cols) {
+		if (err) {
+			// something bad happened.
+		} else {
+			var numberOfCols = cols.size();
+			assert.ok(cols[1].equals(new BigInteger('2')));
+			assert.ok(cols[3].equals(new BigInteger('4')));
+			assert.ok(cols[5].equals(new BigInteger('6')));
+		}
+	});
+
+Maybe you want to cherry-pick a few columns:
+
+	cfLong.get(1, [1, 3, 7], false, 3, 'ONE', function(err, cols) {
+		if (err) {
+			// something bad happened.
+		} else {
+			var numberOfCols = cols.size();
+			assert.ok(cols[1].equals(new BigInteger('2')));
+			assert.ok(cols[3].equals(new BigInteger('4')));
+			assert.ok(cols[5].equals(new BigInteger('6')));
+		}
+	});
+	
+Things you should know about
+============================
+
+### Numbers
+The Javascript Number type doesn't match up well with the java longs and integers stored in Cassandra.
+Therefore all numbers returned in queries are BigIntegers.
+
+todo: more info about BigIntegers.
