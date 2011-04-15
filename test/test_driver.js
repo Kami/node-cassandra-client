@@ -7,17 +7,14 @@ var BigInteger = require('../lib/bigint').BigInteger;
 var Connection = require('../lib/driver').Connection;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
-var System = require('../node-cassandra-client').System;
-var KsDef = require('../node-cassandra-client').KsDef;
-var CfDef = require('../node-cassandra-client').CfDef;
+var System = require('../lib/system').System;
+var KsDef = require('../lib/system').KsDef;
+var CfDef = require('../lib/system').CfDef;
 
-function stringToHex(s, quote) {
+function stringToHex(s) {
   var buf = '';
   for (var i = 0; i < s.length; i++) {
     buf += s.charCodeAt(i).toString(16);
-  }
-  if (quote) {
-    buf = '\'' + buf + '\'';
   }
   return buf;
 }
@@ -68,91 +65,83 @@ exports['setUp'] = function(callback) {
   maybeCreateKeyspace(callback);
 };
 
-exports['testInvalidUpdate'] = function() {
-  var con = connect();
-  var stmt = con.createStatement();
-  stmt.update('select \'cola\' from Standard1 where key=' + stringToHex('key0', true), function(err) {
-    con.close();
-    assert.notEqual(err, null);
-  });
-};
-
 exports['testSimpleUpdate'] = function() {
   var con = connect();
-  var stmt = con.createStatement();
-  var key = stringToHex('key0', true);
-  stmt.update('update Standard1 set \'cola\'=\'valuea\', \'colb\'=\'valueb\' where key=' + key, function(updateErr) {
+  var key = stringToHex('key0');
+  con.execute('update Standard1 set ?=?, ?=? where key=?', ['cola', 'valuea', 'colb', 'valueb', key], function(updateErr) {
     if (updateErr) {
       con.close();
       throw new Error(updateErr);
+    } else {
+      con.execute('select ?, ? from Standard1 where key=?', ['cola', 'colb', key], function(selectErr, row) {
+        con.close();
+        if (selectErr) {
+          console.log(selectErr);
+          throw new Error(selectErr);
+        }
+        assert.strictEqual('cola', row.cols[0].name);
+        assert.strictEqual('valuea', row.cols[0].value);
+      });
     }
-    // verify the query succeeded.
-    stmt.query('select \'cola\', \'colb\' from Standard1 where key=' + key, function(selectErr, res) {
-      con.close();
-      if (selectErr) {
-        throw new Error(selectErr);
-      }
-      assert.ok(res.next());
-      assert.equal('valuea', res.getByIndex(0).value);
-      assert.equal('cola', res.getByIndex(0).name);
-      assert.equal('valueb', res.getByIndex(1).value);
-      assert.equal('colb', res.getByIndex(1).name);
-      assert.equal('valuea', res.getByName('cola'));
-      assert.equal('valueb', res.getByName('colb'));
-      assert.ok(!res.next());
-    });
   });
 };
 
 exports['testSimpleDelete'] = function() {
   var con = connect();
-  var stmt = con.createStatement();
-  var key = stringToHex('key1', true);
-  stmt.update('update Standard1 set \'colx\'=\'xxx\', \'colz\'=\'bbb\' where key=' + key, function(updateErr) {
+  var key = stringToHex('key1');
+  con.execute('update Standard1 set ?=?, ?=? where key=?', ['colx', 'xxx', 'colz', 'bbb', key], function(updateErr) {
     if (updateErr) {
       con.close();
       throw new Error(updateErr);
+    } else {
+      con.execute('delete ?,? from Standard1 where key=?', ['colx', 'colz', key], function(delErr) {
+        if (delErr) {
+          con.close();
+          throw new Error(delErr);
+        } else {
+          con.execute('select ?,? from Standard1 where key=?', ['colx', 'colz', key], function(selErr, row) {
+            con.close();
+            if (selErr) {
+              throw new Error(selErr);
+            } else {
+              assert.strictEqual(0, row.colCount());
+            }
+          });
+        }
+      });
     }
-    stmt.update('delete \'colx\', \'colz\' from Standard1 where key=' + key, function(deleteErr) {
-      con.close();
-      if (deleteErr) {
-        throw new Error(deleteErr);
-      }
-    });
   });
 };
 
 exports['testLong'] = function() {
   var con = connect();
-  var stmt = con.createStatement();
   // the third pair is ±2^62, which overflows the 53 bits in the fp mantissa js uses for numbers (should lose precision
   // coming back), but still fits nicely in an 8-byte long (it should work).
-  stmt.update('update CfLong set \'1\'=\'2\', \'3\'=\'4\', \'4611686018427387904\'=\'-4611686018427387904\' where key=\'12345\'', function(updateErr) {
-    if (updateErr) {
+  // notice how updParams will take either a string or BigInteger
+  var updParms = [1, 2, 3, 4, '4611686018427387904', new BigInteger('-4611686018427387904'), 12345]
+  var selParms = [1, 3, new BigInteger('4611686018427387904'), 12345];
+  con.execute('update CfLong set ?=?,?=?,?=? where key=?', updParms, function(updErr) {
+    if (updErr) {
       con.close();
-      throw new Error(updateErr);
+      throw new Error(updErr);
     } else {
-      stmt.query('select \'1\', \'3\', \'4611686018427387904\' from CfLong where key=\'12345\'', function(selectErr, res) {
+      con.execute('select ?,?,? from CfLong where key=?', selParms, function(selErr, row) {
         con.close();
-        if (selectErr) {
-          throw new Error(selectErr);
+        if (selErr) {
+          throw new Error(selErr);
         }
-        assert.ok(res.next());
+        assert.strictEqual(3, row.colCount());
         
-        // getting by index is easy.
-        assert.equal('1', res.getByIndex(0).name.toString());
-        assert.equal('2', res.getByIndex(0).value.toString());
-        assert.equal('3', res.getByIndex(1).name.toString());
-        assert.equal('4', res.getByIndex(1).value.toString());
-        assert.ok(new BigInteger('4611686018427387904').equals(res.getByIndex(2).name));
-        assert.ok(new BigInteger('-4611686018427387904').equals(res.getByIndex(2).value));
+        assert.ok(new BigInteger('1').equals(row.cols[0].name));
+        assert.ok(new BigInteger('2').equals(row.cols[0].value));
+        assert.ok(new BigInteger('3').equals(row.cols[1].name));
+        assert.ok(new BigInteger('4').equals(row.cols[1].value));
+        assert.ok(new BigInteger('4611686018427387904').equals(row.cols[2].name));
+        assert.ok(new BigInteger('-4611686018427387904').equals(row.cols[2].value));
         
-        // getting by column name is harder.
-        assert.equal('2', res.getByName(1).toString());
-        assert.equal('4', res.getByName(3).toString());
-        assert.ok(new BigInteger('-4611686018427387904').equals(res.getByName(new BigInteger('4611686018427387904'))));
-        
-        assert.ok(!res.next());
+        assert.ok(new BigInteger('2').equals(row.colHash['1']));
+        assert.ok(new BigInteger('4').equals(row.colHash['3']));
+        assert.ok(new BigInteger('-4611686018427387904').equals(row.colHash['4611686018427387904']));
       });
     }
   });
@@ -160,34 +149,31 @@ exports['testLong'] = function() {
 
 exports['testInt'] = function() {
   var con = connect();
-  var stmt = con.createStatement();
   // make sure to use some numbers that will overflow a 64 bit signed value.
-  stmt.update('update CfInt set \'1\'=\'11\', \'-1\'=\'-11\', \'8776496549718567867543025521\'=\'-8776496549718567867543025521\' where key=\'3456543434345654345332453455633\'', function(updateErr) {
-    if (updateErr) {
+  var updParms = [1, 11, -1, -11, '8776496549718567867543025521', '-8776496549718567867543025521', '3456543434345654345332453455633'];
+  var selParms = [-1, 1, '8776496549718567867543025521', '3456543434345654345332453455633'];
+  con.execute('update CfInt set ?=?, ?=?, ?=? where key=?', updParms, function(updErr) {
+    if (updErr) {
       con.close();
-      throw new Error(updateErr);
+      throw new Error(updErr);
     } else {
-      stmt.query('select \'-1\', \'1\', \'8776496549718567867543025521\' from CfInt where key=\'3456543434345654345332453455633\'', function(selectErr, res) {
+      con.execute('select ?, ?, ? from CfInt where key=?', selParms, function(selErr, row) {
         con.close();
-        if (selectErr) {
-          throw new Error(selectErr);
+        if (selErr) {
+          throw new Error(selErr);
         }
-        assert.ok(res.next());
+        assert.strictEqual(3, row.colCount());
         
-        // by index
-        assert.ok(new BigInteger('-1').equals(res.getByIndex(0).name));
-        assert.ok(new BigInteger('-11').equals(res.getByIndex(0).value));
-        assert.ok(new BigInteger('1').equals(res.getByIndex(1).name));
-        assert.ok(new BigInteger('11').equals(res.getByIndex(1).value));
-        assert.ok(new BigInteger('8776496549718567867543025521').equals(res.getByIndex(2).name));
-        assert.ok(new BigInteger('-8776496549718567867543025521').equals(res.getByIndex(2).value));
+        assert.ok(new BigInteger('-1').equals(row.cols[0].name));
+        assert.ok(new BigInteger('-11').equals(row.cols[0].value));
+        assert.ok(new BigInteger('1').equals(row.cols[1].name));
+        assert.ok(new BigInteger('11').equals(row.cols[1].value));
+        assert.ok(new BigInteger('8776496549718567867543025521').equals(row.cols[2].name));
+        assert.ok(new BigInteger('-8776496549718567867543025521').equals(row.cols[2].value));
         
-        // by name
-        assert.ok(new BigInteger('-11').equals(res.getByName(new BigInteger('-1'))));
-        assert.ok(new BigInteger('11').equals(res.getByName(new BigInteger('1'))));
-        assert.ok(new BigInteger('-8776496549718567867543025521').equals(res.getByName(new BigInteger('8776496549718567867543025521'))));
-        
-        assert.ok(!res.next());
+        assert.ok(new BigInteger('11').equals(row.colHash['1']));
+        assert.ok(new BigInteger('-11').equals(row.colHash['-1']));
+        assert.ok(new BigInteger('-8776496549718567867543025521').equals(row.colHash['8776496549718567867543025521']));
       });
     }
   });
@@ -198,59 +184,40 @@ exports['testUUID'] = function() {
   assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
   assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
   var con = connect();
-  var stmt = con.createStatement();
-  stmt.update('update CfUuid set \'6f8483b0-65e0-11e0-0000-fe8ebeead9fe\'=\'6fd45160-65e0-11e0-0000-fe8ebeead9fe\', \'6fd589e0-65e0-11e0-0000-7fd66bb03aff\'=\'6fd6e970-65e0-11e0-0000-fe8ebeead9fe\' where key=\'fa6a8870-65fa-11e0-0000-fe8ebeead9fd\'', function(updateErr) {
-    if (updateErr) {
+  // again, demonstrate that we can use strings or objectifications.
+  var updParms = ['6f8483b0-65e0-11e0-0000-fe8ebeead9fe', '6fd45160-65e0-11e0-0000-fe8ebeead9fe', '6fd589e0-65e0-11e0-0000-7fd66bb03aff', '6fd6e970-65e0-11e0-0000-fe8ebeead9fe', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd'];
+  var selParms = ['6f8483b0-65e0-11e0-0000-fe8ebeead9fe', '6fd589e0-65e0-11e0-0000-7fd66bb03aff', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd'];
+  con.execute('update CfUuid set ?=?, ?=? where key=?', updParms, function(updErr) {
+    if (updErr) {
       con.close();
-      throw new Error(updateErr);
+      throw new Error(updErr);
     } else {
-      stmt.query('select \'6f8483b0-65e0-11e0-0000-fe8ebeead9fe\', \'6fd589e0-65e0-11e0-0000-7fd66bb03aff\' from CfUuid where key=\'fa6a8870-65fa-11e0-0000-fe8ebeead9fd\'', function(selectErr, res) {
+      con.execute('select ?, ? from CfUuid where key=?', selParms, function(selErr, row) {
         con.close();
-        if (selectErr) {
-          throw new Error(selectErr);
+        if (selErr) { 
+          throw new Error(selErr);
         }
-        assert.ok(res.next());
-        assert.ok(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(0).name));
-        assert.ok(new UUID('string', '6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(0).value));
-        assert.ok(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(res.getByIndex(1).name));
-        assert.ok(new UUID('string', '6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(res.getByIndex(1).value));
+        assert.strictEqual(2, row.colCount());
         
-        assert.ok(res.getByName(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')).equals(res.getByIndex(1).value));
-        assert.ok(res.getByName(res.getByIndex(0).name).equals(res.getByIndex(0).value));
-        assert.ok(res.getByName(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe')).equals(res.getByIndex(0).value));
-        assert.ok(res.getByName(res.getByIndex(1).name).equals(res.getByIndex(1).value));
+        assert.ok(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
+        assert.ok(new UUID('string', '6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
+        assert.ok(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
+        assert.ok(new UUID('string', '6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
         
-        assert.ok(!res.next());
+        assert.ok(row.colHash[(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
+        assert.ok(row.colHash[(row.cols[0].name)].equals(row.cols[0].value));
+        assert.ok(row.colHash[(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
+        assert.ok(row.colHash[(row.cols[1].name)].equals(row.cols[1].value));
       });
     }
   });
 };
 
-exports['testExecute'] = function() {
-  var con = connect();
-  con.execute('update CfLong set ?=?,?=?,?=? where key=?', [1,2,3,4,5,6,7], function(updErr) {
-    if (updErr) {
-      con.close();
-      throw new Error(updErr);
-    } else {
-      con.execute('select ?,?,? from CfLong where key=?', [1,3,5, 7], function(selErr, row) {
-        if (selErr) {
-          con.close();
-          throw new Error(selErr);
-        } else {
-          assert.strictEqual(row.colCount(), 3);
-          assert.ok(new BigInteger('2').equals(row.colHash[1]));
-          assert.ok(new BigInteger('4').equals(row.colHash[3]));
-          assert.ok(new BigInteger('6').equals(row.colHash[5]));
-          con.close();
-        }
-      });
-    }
-  });
-}
-
+// todo: slice and range query tests.
 
 //this is for running some of the tests outside of whiskey.
-maybeCreateKeyspace(function() {
-  exports.testExecute();
-});
+//maybeCreateKeyspace(function() {
+//  exports.testLong();
+//  exports.testInt()
+//  exports.testUUID();
+//});
