@@ -118,8 +118,9 @@ exports['testLong'] = function() {
   // the third pair is ±2^62, which overflows the 53 bits in the fp mantissa js uses for numbers (should lose precision
   // coming back), but still fits nicely in an 8-byte long (it should work).
   // notice how updParams will take either a string or BigInteger
-  var updParms = [1, 2, 3, 4, '4611686018427387904', new BigInteger('-4611686018427387904'), 12345]
-  var selParms = [1, 3, new BigInteger('4611686018427387904'), 12345];
+  var key = 123456;
+  var updParms = [1, 2, 3, 4, '4611686018427387904', new BigInteger('-4611686018427387904'), key];
+  var selParms = [1, 3, new BigInteger('4611686018427387904'), key];
   con.execute('update CfLong set ?=?,?=?,?=? where key=?', updParms, function(updErr) {
     if (updErr) {
       con.close();
@@ -146,6 +147,100 @@ exports['testLong'] = function() {
     }
   });
 };
+
+exports['testSlice'] = function() {
+  var con = connect();
+  con.execute('update CfLong set -5=-55, -4=-44, -3=-33, -2=-22, -1=-11, 0=0, 1=11, 2=22, 3=33, 4=44, 5=55 where key=12345', [], function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select ?..? from CfLong where key=12345', [-2, 2], function(selErr, row) {
+        con.close();
+        if (selErr) {
+          throw new Error(selErr);
+        } else {
+          assert.strictEqual(5, row.colCount());
+          assert.ok(row.cols[1].name.equals(new BigInteger('-1')));
+          assert.ok(row.cols[1].value.equals(new BigInteger('-11')));
+          assert.ok(row.cols[3].name.equals(new BigInteger('1')));
+          assert.ok(row.cols[3].value.equals(new BigInteger('11')));
+        }
+      });
+    }
+  });
+};
+
+exports['testReverseSlice'] = function() {
+  var con = connect();
+  con.execute('update CfLong set -5=-55, -4=-44, -3=-33, -2=-22, -1=-11, 0=0, 1=11, 2=22, 3=33, 4=44, 5=55 where key=12345', [], function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+        con.close();
+        if (selErr) {
+          throw new Error(selErr);
+        } else {
+          assert.strictEqual(5, row.colCount());
+          assert.ok(row.cols[3].name.equals(new BigInteger('-1')));
+          assert.ok(row.cols[3].value.equals(new BigInteger('-11')));
+          assert.ok(row.cols[1].name.equals(new BigInteger('1')));
+          assert.ok(row.cols[1].value.equals(new BigInteger('11')));
+        }
+      });
+    }
+  });
+};
+
+exports['testReversedSliceLimit'] = function() {
+  var con = connect();
+  con.execute('update CfLong set -5=-55, -4=-44, -3=-33, -2=-22, -1=-11, 0=0, 1=11, 2=22, 3=33, 4=44, 5=55 where key=12345', [], function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select first 3 REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+        con.close();
+        if (selErr) {
+          throw new Error(selErr);
+        } else {
+          assert.strictEqual(3, row.colCount());
+          assert.ok(row.cols[1].name.equals(new BigInteger('1')));
+          assert.ok(row.cols[1].value.equals(new BigInteger('11')));
+          assert.ok(row.cols[2].name.equals(new BigInteger('0')));
+          assert.ok(row.cols[2].value.equals(new BigInteger('0')));
+          assert.equal(row.cols[2].name, 0);
+          assert.equal(row.cols[2].value, 0);
+        }
+      });
+    }
+  });
+};
+
+exports['testReversedSlice'] = function() {
+  var con = connect();
+  con.execute('update CfLong set -5=-55, -4=-44, -3=-33, -2=-22, -1=-11, 0=0, 1=11, 2=22, 3=33, 4=44, 5=55 where key=12345', [], function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+        con.close();
+        if (selErr) {
+          throw new Error(selErr);
+        } else {
+          assert.strictEqual(5, row.colCount());
+          assert.ok(row.cols[3].name.equals(new BigInteger('-1')));
+          assert.ok(row.cols[3].value.equals(new BigInteger('-11')));
+          assert.ok(row.cols[1].name.equals(new BigInteger('1')));
+          assert.ok(row.cols[1].value.equals(new BigInteger('11')));
+        }
+      });
+    }
+  });
+}
 
 exports['testInt'] = function() {
   var con = connect();
@@ -213,11 +308,13 @@ exports['testUUID'] = function() {
   });
 };
 
-// todo: slice and range query tests.
 
 //this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
 //  exports.testLong();
 //  exports.testInt()
 //  exports.testUUID();
+//  exports.testSlice();
+//  exports.testReverseSlice();
+//  exports.testSliceLimit();
 //});
