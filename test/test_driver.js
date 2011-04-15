@@ -7,9 +7,9 @@ var BigInteger = require('../lib/bigint').BigInteger;
 var Connection = require('../lib/driver').Connection;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
-var System = require('../node-cassandra-client').System;
-var KsDef = require('../node-cassandra-client').KsDef;
-var CfDef = require('../node-cassandra-client').CfDef;
+var System = require('../lib/system').System;
+var KsDef = require('../lib/system').KsDef;
+var CfDef = require('../lib/system').CfDef;
 
 function stringToHex(s) {
   var buf = '';
