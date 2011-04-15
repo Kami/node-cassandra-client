@@ -1,4 +1,4 @@
-node-cassandra-client
+knode-cassandra-client
 ====================
 
 node-cassandra-client is an idiomatic [Node.js](http://nodejs.org) client for [Apache Cassandra](http://cassandra.apache.org).
@@ -8,6 +8,7 @@ Dependencies
 ====================
 
 Just thrift >= 0.6.
+
   $ npm install thrift
 
 Using It
