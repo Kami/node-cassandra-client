@@ -226,7 +226,31 @@ exports['testUUID'] = function() {
   });
 };
 
+exports['testExecute'] = function() {
+  var con = connect();
+  con.execute('update CfLong set ?=?,?=?,?=? where key=?', [1,2,3,4,5,6,7], function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select ?,?,? from CfLong where key=?', [1,3,5, 7], function(selErr, row) {
+        if (selErr) {
+          con.close();
+          throw new Error(selErr);
+        } else {
+          assert.strictEqual(row.colCount(), 3);
+          assert.ok(new BigInteger('2').equals(row.colHash[1]));
+          assert.ok(new BigInteger('4').equals(row.colHash[3]));
+          assert.ok(new BigInteger('6').equals(row.colHash[5]));
+          con.close();
+        }
+      });
+    }
+  });
+}
+
+
 //this is for running some of the tests outside of whiskey.
-//maybeCreateKeyspace(function() {
-//  exports['testUUID']();
-//});
+maybeCreateKeyspace(function() {
+  exports.testExecute();
+});
