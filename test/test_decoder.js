@@ -3,9 +3,31 @@ var assert = require('assert');
 var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToLong = require('../lib/decoder').bytesToLong;
 
+// friggen big integer library is broken.
+exports['testBigIntegerBrokenness'] = function() {
+  // the the v8 lib behaved like the java BigInteger, this test would pass.
+  
+  // this is how the zeroes we read out of the database get constructed.
+  var zero1 = new BigInteger([0]);
+  assert.ok(zero1);
+  
+  // this is how zeroes will be constructed by programmers.
+  var zero2 = new BigInteger('0');
+  assert.ok(zero2);
+  
+  // notice: they are not equal, but if the v8 lib _really_ behaved like java.math.BigInteger (which it claims to emulate)
+  // equality should be achived.
+  assert.ok(!zero1.equals(zero2));
+  
+  // instead, we need to rely on bytesToLong to return the right thing.
+  assert.ok(zero2.equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
+};
+
 exports['testLongConversion'] = function() {
   assert.ok(bytesToLong);
   // we have to compare against strings.
+  assert.ok(new BigInteger('0').equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
+  assert.strictEqual('0', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').toString()); // 1
   assert.strictEqual('1', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001').toString()); // 1
   assert.strictEqual('2', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002').toString()); // 2
   assert.strictEqual('255' ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ').toString()); // 255
