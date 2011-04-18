@@ -1,6 +1,7 @@
 
 var assert = require('assert');
 var console = require('console');
+var EventEmitter = require('events').EventEmitter;
 
 var BigInteger = require('../lib/bigint').BigInteger;
 
@@ -338,7 +339,39 @@ exports['testCustomValidators'] = function() {
       });
     }
   });
-}
+};
+
+// rename to 'testMultipleRows' to get whiskey to call it.
+exports[' MultipleRows'] = function() {
+  var con = connect();
+  var count = 100;
+  var num = 0;
+  for (var i = 0; i < count; i++) {
+//    con.execute('update CfLong set ?=?, ?=?, ?=? where key=?', [1, 1000 * i, 2, 1000000 * i, 3, 100000000 * i, 1000000 + i], function(err) {
+    con.execute('update CfUtf8 set ?=? where key=?', ['cola', 'value' + i, 'abcdefghijklmnopqrstuvwxyz'+i], function(err) {
+      if (err) {
+        throw new Error(err);
+      } else {
+        num += 1;
+        if (num >= count) {
+          // do the selection
+//          con.execute('select ?, ?, ? from CfLong where key >= ? and key <= ?', [1, 2, 3, 1000000, 1000099], function(err, rows) {
+          con.execute('select ? from CfUtf8 where key <= ? and key >= ?', ['cola', 'abcdefghijklmnopqrstuvwxyz', 'abcdefghijklmnopqrstuvwxyz9'], function(err, rows) {
+            con.close();
+            if (err) {
+              console.log(err);
+              throw new Error(err);
+            } else {
+              assert.ok(rows.rowCount() > 0);
+              console.log(rows.rowCount());
+              console.log(rows);
+            }
+          });
+        }
+      }
+    });
+  }
+};
 
 
 //this is for running some of the tests outside of whiskey.
@@ -349,4 +382,5 @@ exports['testCustomValidators'] = function() {
 //  exports.testSlice();
 //  exports.testReverseSlice();
 //  exports.testSliceLimit();
+//  exports.testMultipleRows();
 //});

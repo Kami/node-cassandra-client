@@ -1,24 +1,26 @@
 {
-    "name" : "node-cassandra-client",
-    "version" : "0.0.1",
-    "description" : "High-level Node.js client library for Cassandra", 
-    "main" : "./node-cassanda-client",
-    "keywords" : [
-        "cassandra",
-        "client"
-    ],
-    "author" : {
-        "name" : "Gary Dusbabek",
-        "email" : "gdusbabek@gmail.com",
-    },
-    "license" : "don't know yet",
-    "engine" : ["node >= 0.4.0"],
-    "dependencies" : {
-        "thrift" : ">= 0.6.0",
-        "logmagic": ">= 0.1.1"
-    },
-	"directories" : {
-		"lib" : "./lib"
-	}
-
+  "author": "Gary Dusbabek <gdusbabek@gmail.com>",
+  "name": "node-cassandra-client",
+  "description": "Node.js CQL driver for Apache Cassandra",
+  "version": "0.0.1",
+  "homepage": "https://github.com/racker/node-cassandra-client",
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/racker/node-cassandra-client.git"
+  },
+  "main": "node-cassandra-client",
+  "directories": {
+    "lib": "lib"
+  },
+  "scripts": {
+    "test": "whiskey --tests \"test/test_driver.js\""
+  },
+  "engines": {
+    "node": ">= 0.4.0"
+  },
+  "dependencies" : {
+    "thrift" : ">= 0.6.0",
+    "logmagic": ">= 0.1.1"
+  },
+  "devDependencies": {}
 }
