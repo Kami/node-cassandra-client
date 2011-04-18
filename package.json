@@ -14,7 +14,8 @@
     "license" : "don't know yet",
     "engine" : ["node >= 0.4.0"],
     "dependencies" : {
-        "thrift" : ">= 0.6.0"
+        "thrift" : ">= 0.6.0",
+        "logmagic": ">= 0.1.1"
     },
 	"directories" : {
 		"lib" : "./lib"
