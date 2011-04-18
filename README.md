@@ -1,4 +1,4 @@
-knode-cassandra-client
+node-cassandra-client
 ====================
 
 node-cassandra-client is an idiomatic [Node.js](http://nodejs.org) client for [Apache Cassandra](http://cassandra.apache.org).
@@ -9,8 +9,8 @@ Dependencies
 
 thrift and logmagic
 
-  $ npm install thrift
-  $ npm install logmagic
+    $ npm install thrift
+    $ npm install logmagic
 
 Using It
 ====================
@@ -18,7 +18,7 @@ Using It
 ### Access the System keyspace
     var System = require('node-cassandra-client').System;
     var sys = new System('127.0.0.1:9160');
-    
+
     sys.describeKeyspace('Keyspace1', function(err, ksDef) {
       if (err) {
         // this code path is executed if the key space does not exist.
@@ -38,6 +38,7 @@ Using It
     
 ### Updating
 This example assumes you have strings for keys, column names and values:
+
     var Connection = require('node-cassandra-client').Connection;
     var con = new Connection('user', 'password', 'cassandra-host', 9160, 'Keyspace1');
     con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
