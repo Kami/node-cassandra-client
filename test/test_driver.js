@@ -37,8 +37,15 @@ function maybeCreateKeyspace(callback) {
       var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
       var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
       var cfUuid = new CfDef({keyspace: ksName, name: 'CfUuid', column_type: 'Standard', comparator_type: 'TimeUUIDType', default_validation_class: 'TimeUUIDType', key_validation_class: 'TimeUUIDType'});
+      var cfUgly = new CfDef({keyspace: ksName, name: 'CfUgly', column_type: 'Standard', comparator_type: 'UTF8Type', 
+                              default_validation_class: 'LongType', key_validation_class: 'IntegerType', 
+                              column_metadata: [
+                                new ttypes.ColumnDef({name: 'int_col', validation_class: 'IntegerType'}),
+                                new ttypes.ColumnDef({name: 'string_col', validation_class: 'UTF8Type'}),
+                                new ttypes.ColumnDef({name: 'uuid_col', validation_class: 'TimeUUIDType'})
+                              ]});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid]});
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid, cfUgly]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
         close();
@@ -307,6 +314,31 @@ exports['testUUID'] = function() {
     }
   });
 };
+
+exports['testCustomValidators'] = function() {
+  var con = connect();
+  var updParms = ['normal', 25, 'int_col', 21, 'string_col', 'test_string_value', 'uuid_col', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe', 211];
+  var selParms = ['normal', 'int_col', 'string_col', 'uuid_col', 211];
+  con.execute('update CfUgly set ?=?, ?=?, ?=?, ?=? where key=?', updParms, function(updErr) {
+    if (updErr) {
+      con.close();
+      throw new Error(updErr);
+    } else {
+      con.execute('select  ?, ?, ?, ? from CfUgly where key=?', selParms, function(selErr, row) {
+        con.close();
+        if (selErr) {
+          throw new Error(selErr);
+        }
+        assert.strictEqual(4, row.colCount());
+        
+        assert.ok(row.colHash['normal'].equals(new BigInteger('25')));
+        assert.ok(row.colHash['int_col'].equals(new BigInteger('21')));
+        assert.ok(row.colHash['string_col'] === 'test_string_value');
+        assert.ok(row.colHash['uuid_col'].toString() == '6f8483b0-65e0-11e0-0000-fe8ebeead9fe');
+      });
+    }
+  });
+}
 
 
 //this is for running some of the tests outside of whiskey.
