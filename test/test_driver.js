@@ -12,6 +12,8 @@ var System = require('../lib/system').System;
 var KsDef = require('../lib/system').KsDef;
 var CfDef = require('../lib/system').CfDef;
 
+var CASSANDRA_PORT = 9170;
+
 function stringToHex(s) {
   var buf = '';
   for (var i = 0; i < s.length; i++) {
@@ -21,7 +23,7 @@ function stringToHex(s) {
 }
 
 function maybeCreateKeyspace(callback) {
-  var sys = new System('127.0.0.1:9160');
+  var sys = new System('127.0.0.1:'+CASSANDRA_PORT);
   var ksName = 'Keyspace1';
   var close = function() {
     sys.close(function() {
@@ -66,7 +68,7 @@ function maybeCreateKeyspace(callback) {
 }
 
 function connect() {
-  return new Connection(null, null, '127.0.0.1', 9160, 'Keyspace1');
+  return new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
 }
 
 exports['setUp'] = function(callback) {
@@ -349,7 +351,7 @@ exports['DISABLED_testMultipleRows'] = function() {
   // what I expect.
   
   var ev = new EventEmitter();
-  var sys = new Connection(null, null, '127.0.0.1', 9160, 'system');
+  var sys = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'system');
   
   // attempt to drop the keyspace on error.
   ev.on('syserr', function() {
@@ -362,7 +364,7 @@ exports['DISABLED_testMultipleRows'] = function() {
   ev.on('ksready', function() {
     console.log('keyspace created');
     sys.close();
-    var con = new Connection(null, null, '127.0.0.1', 9160, 'ints');
+    var con = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'ints');
     con.execute('create columnfamily cfints (key int primary key) with comparator=int and default_validation=int', null, function(err) {
       con.close();
       if (err) {
@@ -378,7 +380,7 @@ exports['DISABLED_testMultipleRows'] = function() {
   ev.on('cfready', function() {
     
     // insert 100 rows.
-    var con = new Connection(null, null, '127.0.0.1', 9160, 'ints');
+    var con = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'ints');
     var count = 100;
     var num = 0;
     for (var i = 0; i < count; i++) {
