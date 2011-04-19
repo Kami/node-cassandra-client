@@ -6,6 +6,7 @@ var EventEmitter = require('events').EventEmitter;
 var BigInteger = require('../lib/bigint').BigInteger;
 
 var Connection = require('../lib/driver').Connection;
+var PooledConnection = require('../lib/driver').PooledConnection;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
 var System = require('../lib/system').System;
@@ -418,8 +419,23 @@ exports['DISABLED_testMultipleRows'] = function() {
   });
 };
 
+// TODO: just a stub
+exports['testPooledConnection'] = function() {
+  function bail(conn, err) {
+    conn.shutdown();
+    throw new Error(err);
+  }
+  var conn = new PooledConnection(null, null, '127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
+  conn.execute('UPDATE CfUgly SET A = 1 WHERE KEY = 1', null, function(err, res) {
+    if (err) { bail(conn, err); }   // conair, get it?
+    conn.execute('SELECT A FROM CfUgly WHERE KEY = 1', null, function(err, res) {
+      if (err) { bail(conn, err); }
+      conn.shutdown();
+    });
+  });
+};
 
 //this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
-//  exports.testSimpleDelete();
+//  exports.testPooledConnection();
 //});
