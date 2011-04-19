@@ -50,6 +50,7 @@ This example assumes you have strings for keys, column names and values:
 	});
 
 ### Getting data (single row result)
+
     con.execute('SELECT ? FROM Standard1 WHERE key=?', ['cola', 'key0'], function(err, row) {
         if (err) {
             // handle error
@@ -61,7 +62,17 @@ This example assumes you have strings for keys, column names and values:
     });
 
 ### Getting data (multiple rows)
-Assume the updates have happened previously.  todo: figure out; I can't get this part working consistenently.
+**NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
+Assume the updates have happened previously.
+
+	con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
+		if (err) {
+			// handle error
+		} else {
+			console.log(rows.rowCount());
+			console.log(rows[0]); // behaves just like row in the above example.
+		}
+	});
 	
 Things you should know about
 ============================
@@ -72,4 +83,4 @@ in comparator order and not the order specified in your select clause (see [CASS
 ### Numbers
 The Javascript Number type doesn't match up well with the java longs and integers stored in Cassandra.
 Therefore all numbers returned in queries are BigIntegers.  This means that you need to be careful when you
-do updates.  If you're worried about losing precision, specify your numbers as strings.
+do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
