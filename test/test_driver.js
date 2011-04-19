@@ -96,13 +96,14 @@ exports['testSimpleUpdate'] = function() {
 
 exports['testSimpleDelete'] = function() {
   var con = connect();
-  var key = stringToHex('key1');
+  var key = stringToHex('key2');
   con.execute('update Standard1 set ?=?, ?=? where key=?', ['colx', 'xxx', 'colz', 'bbb', key], function(updateErr) {
     if (updateErr) {
       con.close();
       throw new Error(updateErr);
     } else {
-      con.execute('delete ?,? from Standard1 where key=?', ['colx', 'colz', key], function(delErr) {
+//      con.execute('delete ?,? from Standard1 where key=?', ['colx', 'colz', key], function(delErr) {
+      con.execute('delete ?,? from Standard1 where key in (?)', ['colx', 'colz', key], function(delErr) {
         if (delErr) {
           con.close();
           throw new Error(delErr);
@@ -341,46 +342,82 @@ exports['testCustomValidators'] = function() {
   });
 };
 
-// rename to 'testMultipleRows' to get whiskey to call it.
-exports[' MultipleRows'] = function() {
-  var con = connect();
-  var count = 100;
-  var num = 0;
-  for (var i = 0; i < count; i++) {
-//    con.execute('update CfLong set ?=?, ?=?, ?=? where key=?', [1, 1000 * i, 2, 1000000 * i, 3, 100000000 * i, 1000000 + i], function(err) {
-    con.execute('update CfUtf8 set ?=? where key=?', ['cola', 'value' + i, 'abcdefghijklmnopqrstuvwxyz'+i], function(err) {
+// this test only works an order-preserving partitioner.
+// it also uses an event-based approach to doing things.
+exports['DISABLED_testMultipleRows'] = function() {
+  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
+  // what I expect.
+  
+  var ev = new EventEmitter();
+  var sys = new Connection(null, null, '127.0.0.1', 9160, 'system');
+  
+  // attempt to drop the keyspace on error.
+  ev.on('syserr', function() {
+    console.log('syserr');
+    sys.execute('drop keyspace ints', function(err) {});
+    sys.close();
+  });
+
+  // keyspace is there for sure. don't know about the cf.
+  ev.on('ksready', function() {
+    console.log('keyspace created');
+    sys.close();
+    var con = new Connection(null, null, '127.0.0.1', 9160, 'ints');
+    con.execute('create columnfamily cfints (key int primary key) with comparator=int and default_validation=int', null, function(err) {
+      con.close();
       if (err) {
-        throw new Error(err);
+        ev.emit('syserr');
       } else {
-        num += 1;
-        if (num >= count) {
-          // do the selection
-//          con.execute('select ?, ?, ? from CfLong where key >= ? and key <= ?', [1, 2, 3, 1000000, 1000099], function(err, rows) {
-          con.execute('select ? from CfUtf8 where key <= ? and key >= ?', ['cola', 'abcdefghijklmnopqrstuvwxyz', 'abcdefghijklmnopqrstuvwxyz9'], function(err, rows) {
-            con.close();
-            if (err) {
-              console.log(err);
-              throw new Error(err);
-            } else {
-              assert.ok(rows.rowCount() > 0);
-              console.log(rows.rowCount());
-              console.log(rows);
-            }
-          });
-        }
+        ev.emit('cfready');
       }
     });
-  }
+    con.close();
+  });
+  
+  // column family is ready, do the test.
+  ev.on('cfready', function() {
+    
+    // insert 100 rows.
+    var con = new Connection(null, null, '127.0.0.1', 9160, 'ints');
+    var count = 100;
+    var num = 0;
+    for (var i = 0; i < count; i++) {
+      con.execute('update cfints set ?=? where key=?', [1, i, i], function(err) {
+        if (err) {
+          con.close();
+          throw new Error(err);
+        } else {
+          num += 1;
+          
+          // after all the rows are in, do a query.
+          if (num >= count) {
+            con.execute('select ? from cfints where key > ? and key < ?', [1, 10, 20], function(serr, rows) {
+              con.close();
+              assert.strictEqual(rows.rowCount(), 11);
+            });
+          }
+        }
+      });
+    }
+  });
+  
+  // start everything off.
+  sys.execute('drop keyspace ints', null, function(dropErr) {
+    if (!dropErr) {
+      console.log('keyspace dropped');
+    }
+    sys.execute('create keyspace ints with strategy_class=SimpleStrategy and strategy_options:replication_factor=1', null, function(createKsErr) {
+      if (createKsErr) {
+        ev.emit('syserr');
+      } else {
+        ev.emit('ksready');
+      }
+    });
+  });
 };
 
 
 //this is for running some of the tests outside of whiskey.
 //maybeCreateKeyspace(function() {
-//  exports.testLong();
-//  exports.testInt()
-//  exports.testUUID();
-//  exports.testSlice();
-//  exports.testReverseSlice();
-//  exports.testSliceLimit();
-//  exports.testMultipleRows();
+//  exports.testSimpleDelete();
 //});
