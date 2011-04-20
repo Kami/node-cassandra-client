@@ -426,7 +426,7 @@ exports['testPooledConnection'] = function() {
   }
   
   var hosts = ["127.0.0.2:9170", "127.0.0.1:9170", "127.0.0.3:9170"];
-  var conn = new PooledConnection(hosts, "Keyspace1");
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
   
   // Create a record to query
   conn.execute('UPDATE CfUgly SET A = 1 WHERE KEY = 1', null, function(err, res) {
