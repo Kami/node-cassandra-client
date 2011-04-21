@@ -1,8 +1,8 @@
 node-cassandra-client
 ====================
 
-node-cassandra-client is an idiomatic [Node.js](http://nodejs.org) client for [Apache Cassandra](http://cassandra.apache.org).
-It deals with thrift so you can do other things.
+node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache Cassandra](http://cassandra.apache.org).
+It deals with thrift so you can do other things.  For use with Cassandra 0.8 and later.
 
 License
 ====================
@@ -84,10 +84,6 @@ Assume the updates have happened previously.
 	
 Things you should know about
 ============================
-### Result Ordering
-Right now, if your select clause selects individual columns (not a slice), those columns will come back
-in comparator order and not the order specified in your select clause (see [CASSANDRA-2493](https://issues.apache.org/jira/browse/CASSANDRA-2493)).
-
 ### Numbers
 The Javascript Number type doesn't match up well with the java longs and integers stored in Cassandra.
 Therefore all numbers returned in queries are BigIntegers.  This means that you need to be careful when you
