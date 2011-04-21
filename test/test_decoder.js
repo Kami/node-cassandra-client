@@ -21,7 +21,7 @@ var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToLong = require('../lib/decoder').bytesToLong;
 
 // friggen big integer library is broken.
-exports['testBigIntegerBrokenness'] = function() {
+exports.testBigIntegerBrokenness = function() {
   // the the v8 lib behaved like the java BigInteger, this test would pass.
   
   // this is how the zeroes we read out of the database get constructed.
@@ -40,7 +40,7 @@ exports['testBigIntegerBrokenness'] = function() {
   assert.ok(zero2.equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
 };
 
-exports['testLongConversion'] = function() {
+exports.testLongConversion = function() {
   assert.ok(bytesToLong);
   // we have to compare against strings.
   assert.ok(new BigInteger('0').equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
@@ -56,7 +56,7 @@ exports['testLongConversion'] = function() {
 };
 
 /** make sure sign extension and unsigned/signed conversions don't bite us. */
-exports['testBigIntEdges'] = function() {
+exports.testBigIntEdges = function() {
   
   assert.ok(new BigInteger([255]).equals(new BigInteger([-1])));
   assert.ok(new BigInteger([245]).equals(new BigInteger([-11])));
@@ -68,7 +68,7 @@ exports['testBigIntEdges'] = function() {
 };
 
 /** verify byte array fidelity with java.math.BigInteger */
-exports['testBigInt'] = function() {
+exports.testBigInt = function() {
   // these arrays were generated using java program below.
   var expectedArrays = [
     [ 23 ],
@@ -190,7 +190,7 @@ public class TestBigInt {
  */
 };
 
-exports['testUUID'] = function() {
+exports.testUUID = function() {
   /* from java:
   ddf09190-6612-11e0-0000-fe8ebeead9f8->[221,240,145,144,102,18,17,224,0,0,254,142,190,234,217,248,] 
   ddf0b8a0-6612-11e0-0000-1e4e5d5425fc->[221,240,184,160,102,18,17,224,0,0,30,78,93,84,37,252,]      

@@ -100,14 +100,14 @@ function connect(callback) {
     } else {
       callback(null, con);
     }
-  })
+  });
 }
 
-exports['setUp'] = function(callback) {
+exports.setUp = function(callback) {
   maybeCreateKeyspace(callback);
 };
 
-exports['testSimpleUpdate'] = function() {
+exports.testSimpleUpdate = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -133,7 +133,7 @@ exports['testSimpleUpdate'] = function() {
   });
 };
 
-exports['testSimpleDelete'] = function() {
+exports.testSimpleDelete = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -165,7 +165,7 @@ exports['testSimpleDelete'] = function() {
   });
 };
 
-exports['testLong'] = function() {
+exports.testLong = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -205,7 +205,7 @@ exports['testLong'] = function() {
   });
 };
 
-exports['testSlice'] = function() {
+exports.testSlice = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -233,7 +233,7 @@ exports['testSlice'] = function() {
   }); 
 };
 
-exports['testReverseSlice'] = function() {
+exports.testReverseSlice = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -261,7 +261,7 @@ exports['testReverseSlice'] = function() {
   });
 };
 
-exports['testReversedSliceLimit'] = function() {
+exports.testReversedSliceLimit = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -291,7 +291,7 @@ exports['testReversedSliceLimit'] = function() {
   });
 };
 
-exports['testReversedSlice'] = function() {
+exports.testReversedSlice = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -319,7 +319,7 @@ exports['testReversedSlice'] = function() {
   });
 };
 
-exports['testInt'] = function() {
+exports.testInt = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -356,7 +356,7 @@ exports['testInt'] = function() {
   });
 };
 
-exports['testUUID'] = function() {
+exports.testUUID = function() {
   // make sure we're not comparing the same things.
   assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
   assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
@@ -395,7 +395,7 @@ exports['testUUID'] = function() {
   });
 };
 
-exports['testCustomValidators'] = function() {
+exports.testCustomValidators = function() {
   connect(function(err, con) {
     if (err) {
       throw new Error(err);
@@ -414,10 +414,10 @@ exports['testCustomValidators'] = function() {
             }
             assert.strictEqual(4, row.colCount());
             
-            assert.ok(row.colHash['normal'].equals(new BigInteger('25')));
-            assert.ok(row.colHash['int_col'].equals(new BigInteger('21')));
-            assert.ok(row.colHash['string_col'] === 'test_string_value');
-            assert.ok(row.colHash['uuid_col'].toString() == '6f8483b0-65e0-11e0-0000-fe8ebeead9fe');
+            assert.ok(row.colHash.normal.equals(new BigInteger('25')));
+            assert.ok(row.colHash.int_col.equals(new BigInteger('21')));
+            assert.ok(row.colHash.string_col === 'test_string_value');
+            assert.ok(row.colHash.uuid_col.toString() == '6f8483b0-65e0-11e0-0000-fe8ebeead9fe');
           });
         }
       });
@@ -427,7 +427,7 @@ exports['testCustomValidators'] = function() {
 
 // this test only works an order-preserving partitioner.
 // it also uses an event-based approach to doing things.
-exports['DISABLED_testMultipleRows'] = function() {
+exports.DISABLED_testMultipleRows = function() {
   // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
   // what I expect.
   
@@ -504,7 +504,7 @@ exports['DISABLED_testMultipleRows'] = function() {
   });
 };
 
-exports['testPooledConnection'] = function() {
+exports.testPooledConnection = function() {
   function bail(conn, err) {
     conn.shutdown();
     throw new Error(err);
