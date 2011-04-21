@@ -19,6 +19,7 @@ thrift and logmagic
 
     $ npm install thrift
     $ npm install logmagic
+    $ npm install generic-pool
 
 Using It
 ====================
@@ -82,6 +83,48 @@ Assume the updates have happened previously.
 		}
 	});
 	
+### Pooled Connections
+    // Creating a new connection pool.
+    var PooledConnection = require('node-cassandra-client').PooledConnection;
+    var hosts = ['host1:9160', 'host2:9170', 'host3', 'host4'];
+    var connection_pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+
+PooledConnection() accepts an objects with these slots:
+
+         hosts : String list in host:port format. Port is optional (defaults to 9160).
+      keyspace : Name of keyspace to use.
+          user : User for authentication (optional).
+          pass : Password for authentication (optional).
+       maxSize : Maximum number of connection to pool (optional).
+    idleMillis : Idle connection timeout in milliseconds (optional).
+
+Queries are performed using the `execute()` method in the same manner as `Connection`,
+(see above).  For example:
+
+    // Writing
+    connection_pool.execute('UPDATE Standard1 SET ?=? WHERE KEY=?', ['A', '1', 'K'],
+      function(err) {
+        if (err) console.log("success");
+        else console.log("failure");
+      }
+    );
+    
+    // Reading
+    connection_pool.execute('SELECT ? FROM Standard1 WHERE KEY=?', ['A', 'K'],
+      function(err, row) {
+        if (err) console.log("success");
+        else console.log("got result " + row.cols[0].value);
+      }
+    );
+
+When you are finished with a `PooledConnection` instance, call `shutdown(callback)`.
+Shutting down the pool prevents further work from being enqueued, and closes all 
+open connections after pending requests are complete.
+
+    // Shutting down a pool
+    connection_pool.shutdown(function() { console.log("connection pool shutdown"); });
+
+
 Things you should know about
 ============================
 ### Numbers
@@ -90,5 +133,4 @@ Therefore all numbers returned in queries are BigIntegers.  This means that you 
 do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
 
 ### TODO
-* connection pool support
 * document decoding
