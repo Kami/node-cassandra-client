@@ -4,6 +4,14 @@ node-cassandra-client
 node-cassandra-client is an idiomatic [Node.js](http://nodejs.org) client for [Apache Cassandra](http://cassandra.apache.org).
 It deals with thrift so you can do other things.
 
+License
+====================
+
+node-cassandra-client is distributed under the [Apache license](http://www.apache.org/licenses/LICENSE-2.0.html).
+
+[lib/bigint.js](lib/bigint.js) is [borrowed](https://github.com/joyent/node/blob/master/deps/v8/benchmarks/crypto.js)
+from the Node.js source (which comes from the [V8](http://code.google.com/p/v8/) source).
+
 Dependencies
 ====================
 
@@ -84,3 +92,7 @@ in comparator order and not the order specified in your select clause (see [CASS
 The Javascript Number type doesn't match up well with the java longs and integers stored in Cassandra.
 Therefore all numbers returned in queries are BigIntegers.  This means that you need to be careful when you
 do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
+
+### TODO
+* connection pool support
+* document decoding
