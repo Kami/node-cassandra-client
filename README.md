@@ -104,15 +104,15 @@ Queries are performed using the `execute()` method in the same manner as `Connec
     // Writing
     connection_pool.execute('UPDATE Standard1 SET ?=? WHERE KEY=?', ['A', '1', 'K'],
       function(err) {
-        if (err) console.log("success");
-        else console.log("failure");
+        if (err) console.log("failure");
+        else console.log("success");
       }
     );
     
     // Reading
     connection_pool.execute('SELECT ? FROM Standard1 WHERE KEY=?', ['A', 'K'],
       function(err, row) {
-        if (err) console.log("success");
+        if (err) console.log("lookup failed");
         else console.log("got result " + row.cols[0].value);
       }
     );
