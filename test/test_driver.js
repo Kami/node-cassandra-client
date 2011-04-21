@@ -105,7 +105,7 @@ function connect(callback) {
   handler.on('ready', function(con) {
     callback(null, con);
   });
-  var con = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
+  var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -443,7 +443,7 @@ exports['DISABLED_testMultipleRows'] = function() {
   // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
   // what I expect.
   
-  var sys = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'system');
+  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system');
   sys.connect(function(err) {
     if (err) {
       throw new Error(err);
@@ -460,7 +460,7 @@ exports['DISABLED_testMultipleRows'] = function() {
       ev.on('ksready', function() {
         console.log('keyspace created');
         sys.close();
-        var con = new Connection(null, null, '127.0.0.1', CASSANDRA_PORT, 'ints');
+        var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'ints');
         con.execute('create columnfamily cfints (key int primary key) with comparator=int and default_validation=int', null, function(err) {
           con.close();
           if (err) {
@@ -476,7 +476,7 @@ exports['DISABLED_testMultipleRows'] = function() {
       ev.on('cfready', function() {
         
         // insert 100 rows.
-        var con = new Connection(null, null, '127.0.0.1', 9160, 'ints');
+        var con = new Connection('127.0.0.1', 9160, 'ints');
         var count = 100;
         var num = 0;
         for (var i = 0; i < count; i++) {

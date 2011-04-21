@@ -48,7 +48,7 @@ Using It
 This example assumes you have strings for keys, column names and values:
 
     var Connection = require('node-cassandra-client').Connection;
-    var con = new Connection('user', 'password', 'cassandra-host', 9160, 'Keyspace1');
+    var con = new Connection('cassandra-host', 9160, 'Keyspace1', 'user', 'password');
     con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
         if (err) {
             // handle error
