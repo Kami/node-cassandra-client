@@ -493,24 +493,23 @@ exports['testPooledConnection'] = function() {
     throw new Error(err);
   }
   
-  var hosts = ["127.0.0.2:9170", "127.0.0.1:9170", "127.0.0.3:9170"];
+  //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
+  var hosts = ["127.0.0.1:9170"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
   
-  // Create a record to query
-  conn.execute('UPDATE CfUgly SET A = 1 WHERE KEY = 1', null, function(err, res) {
-    if (err) { bail(conn, err); }   // conair, get it?
-    conn.execute('SELECT A FROM CfUgly WHERE KEY = 1', null, function(err, res) {
-      if (err) { bail(conn, err); }
-      conn.shutdown();
-    });
-  });
-  
   // Hammer time...
-  for (var i = 0; i < 100; i++) {
-    conn.execute('SELECT A FROM CfUgly WHERE KEY = 1', null, function(err, row) {
-      assert.strictEqual(row.cols[0].name, 'A');
-    });
-  }
+  conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+    if (err) { bail(conn, err); }
+    
+    for (var i = 0; i < 100; i++) {
+      conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, row) {
+        if (err) { bail(conn, err); }
+        assert.strictEqual(row.cols[0].name, 'A');
+      });
+    }
+    
+    conn.shutdown();
+  });
 };
 
 //this is for running some of the tests outside of whiskey.
