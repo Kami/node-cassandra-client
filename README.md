@@ -1,25 +1,23 @@
 node-cassandra-client
 ====================
 
-node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache Cassandra](http://cassandra.apache.org).
-It deals with thrift so you can do other things.  For use with Cassandra 0.8 and later.
+node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache Cassandra](http://cassandra.apache.org) 0.8 and later.
+
+CQL is a query language for Apache Cassandra.  You use it in much the same way you would use SQL for a relational database.
+The Cassandra [documentation](https://svn.apache.org/viewvc/cassandra/trunk/doc/cql/CQL.html?view=co) can help you learn the syntax.
 
 License
 ====================
 
 node-cassandra-client is distributed under the [Apache license](http://www.apache.org/licenses/LICENSE-2.0.html).
 
-[lib/bigint.js](lib/bigint.js) is [borrowed](https://github.com/joyent/node/blob/master/deps/v8/benchmarks/crypto.js)
+[lib/bigint.js](https://github.com/racker/node-cassandra-client/blob/master/lib/bigint.js) is [borrowed](https://github.com/joyent/node/blob/master/deps/v8/benchmarks/crypto.js)
 from the Node.js source (which comes from the [V8](http://code.google.com/p/v8/) source).
 
-Dependencies
+Installation
 ====================
 
-thrift and logmagic
-
-    $ npm install thrift
-    $ npm install logmagic
-    $ npm install generic-pool
+    $ npm install cassandra-client
 
 Using It
 ====================
@@ -132,5 +130,14 @@ The Javascript Number type doesn't match up well with the java longs and integer
 Therefore all numbers returned in queries are BigIntegers.  This means that you need to be careful when you
 do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
 
-### TODO
-* document decoding
+### Decoding
+node-cassandra-client supports Cassandra `BytesType`, `IntegerType`, `LongTime` and `TimeUUIDType` out of the box.  
+When dealing with numbers, the values you retreive out of rows will all be `BigInteger`s (be wary of losing precision
+if your numbers are bigger than 2^53--you know, like a timestamp).
+
+`BigInteger` supports many operations like add, subtract, multiply, etc., and a few others that may come in handy: shift, square, abs, etc.  Check the source if you'd like to know more.
+
+We technically have a [UUID type](https://github.com/racker/node-cassandra-client/blob/master/lib/uuid.js), but have not had the need to flesh it out yet.  If you find the need to expose more parts of the UUID (timestamp, node, clock sequence, etc.), or would like to implement some operations, patches are welcome.
+
+### Todo
+* Full BigInteger documentation.
