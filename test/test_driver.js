@@ -111,27 +111,43 @@ exports.testWhiskyIsWorking = function(test, assert) {
   test.finish();
 }
 
-exports.testSimpleUpdate = function(test, assert) {
+//exports.testSimpleUpdate = function(test, assert) {
+//  connect(function(err, con) {
+//    if (err) {
+//      assert.ifError(err);
+//      test.finish();
+//    } else {
+//      var key = stringToHex('key0');
+//      con.execute('update Standard1 set ?=?, ?=? where key=?', ['cola', 'valuea', 'colb', 'valueb', key], function(updateErr) {
+//        if (updateErr) {
+//          con.close();
+//          assert.ifError(updateErr);
+//          test.finish();
+//        } else {
+//          con.execute('select ?, ? from Standard1 where key=?', ['cola', 'colb', key], function(selectErr, row) {
+//            con.close();
+//            assert.ifError(selectErr);
+//            assert.strictEqual('cola', row.cols[0].name);
+//            assert.strictEqual('valuea', row.cols[0].value);
+//            test.finish();
+//          });
+//        }
+//      });
+//    }
+//  });
+//};
+
+exports.testUpdateWithNull = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ifError(err);
       test.finish();
     } else {
       var key = stringToHex('key0');
-      con.execute('update Standard1 set ?=?, ?=? where key=?', ['cola', 'valuea', 'colb', 'valueb', key], function(updateErr) {
-        if (updateErr) {
-          con.close();
-          assert.ifError(updateErr);
-          test.finish();
-        } else {
-          con.execute('select ?, ? from Standard1 where key=?', ['cola', 'colb', key], function(selectErr, row) {
-            con.close();
-            assert.ifError(selectErr);
-            assert.strictEqual('cola', row.cols[0].name);
-            assert.strictEqual('valuea', row.cols[0].value);
-            test.finish();
-          });
-        }
+      con.execute('update Standard1 set ?=?, ?=? where key=?', ['cola', null, 'colb', 'valueb', key], function(updateErr) {
+        con.close();
+        assert.ok(updateErr);
+        test.finish();
       });
     }
   });
@@ -460,8 +476,8 @@ exports.testCustomValidators = function(test, assert) {
   });
 };
 
-//// this test only works an order-preserving partitioner.
-//// it also uses an event-based approach to doing things.
+// this test only works an order-preserving partitioner.
+// it also uses an event-based approach to doing things.
 //exports.DISABLED_testMultipleRows = function(test, assert) {
 //  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
 //  // what I expect.
@@ -568,4 +584,5 @@ exports.testPooledConnection = function(test, assert) {
     test.finish();
   });
 };
-//
+
+
