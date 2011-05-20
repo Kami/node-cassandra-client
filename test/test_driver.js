@@ -124,9 +124,11 @@ exports.testSimpleUpdate = function(test, assert) {
           assert.ifError(updateErr);
           test.finish();
         } else {
-          con.execute('select ?, ? from Standard1 where key=?', ['cola', 'colb', key], function(selectErr, row) {
+          con.execute('select ?, ? from Standard1 where key=?', ['cola', 'colb', key], function(selectErr, rows) {
             con.close();
             assert.ifError(selectErr);
+            assert.strictEqual(rows.rowCount(), 1);
+            var row = rows[0];
             assert.strictEqual('cola', row.cols[0].name);
             assert.strictEqual('valuea', row.cols[0].value);
             test.finish();
@@ -171,11 +173,13 @@ exports.testSimpleDelete = function(test, assert) {
               assert.ok(false);
               test.finish();
             } else {
-              con.execute('select ?,? from Standard1 where key=?', ['colx', 'colz', key], function(selErr, row) {
+              con.execute('select ?,? from Standard1 where key=?', ['colx', 'colz', key], function(selErr, rows) {
                 con.close();
                 if (selErr) {
                   assert.ok(false);
                 } else {
+                  assert.strictEqual(rows.rowCount(), 1);
+                  var row = rows[0];
                   assert.strictEqual(0, row.colCount());
                 }
                 test.finish();
@@ -206,11 +210,13 @@ exports.testLong = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ?,?,? from CfLong where key=?', selParms, function(selErr, row) {
+          con.execute('select ?,?,? from CfLong where key=?', selParms, function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(3, row.colCount());
               
               assert.ok(new BigInteger('1').equals(row.cols[0].name));
@@ -244,11 +250,13 @@ exports.testSlice = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ?..? from CfLong where key=12345', [-2, 2], function(selErr, row) {
+          con.execute('select ?..? from CfLong where key=12345', [-2, 2], function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(5, row.colCount());
               assert.ok(row.cols[1].name.equals(new BigInteger('-1')));
               assert.ok(row.cols[1].value.equals(new BigInteger('-11')));
@@ -275,11 +283,13 @@ exports.testReverseSlice = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+          con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(5, row.colCount());
               assert.ok(row.cols[3].name.equals(new BigInteger('-1')));
               assert.ok(row.cols[3].value.equals(new BigInteger('-11')));
@@ -306,11 +316,13 @@ exports.testReversedSliceLimit = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select first 3 REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+          con.execute('select first 3 REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);              
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0]
               assert.strictEqual(3, row.colCount());
               assert.ok(row.cols[1].name.equals(new BigInteger('1')));
               assert.ok(row.cols[1].value.equals(new BigInteger('11')));
@@ -339,11 +351,13 @@ exports.testReversedSlice = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, row) {
+          con.execute('select REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(5, row.colCount());
               assert.ok(row.cols[3].name.equals(new BigInteger('-1')));
               assert.ok(row.cols[3].value.equals(new BigInteger('-11')));
@@ -373,11 +387,13 @@ exports.testInt = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ?, ?, ? from CfInt where key=?', selParms, function(selErr, row) {
+          con.execute('select ?, ?, ? from CfInt where key=?', selParms, function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              var row = rows[0];
+              assert.strictEqual(rows.rowCount(), 1);
               assert.strictEqual(3, row.colCount());
               
               assert.ok(new BigInteger('-1').equals(row.cols[0].name));
@@ -417,11 +433,13 @@ exports.testUUID = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ?, ? from CfUuid where key=?', selParms, function(selErr, row) {
+          con.execute('select ?, ? from CfUuid where key=?', selParms, function(selErr, rows) {
             con.close();
             if (selErr) { 
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(2, row.colCount());
               
               assert.ok(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
@@ -456,11 +474,13 @@ exports.testCustomValidators = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select  ?, ?, ?, ? from CfUgly where key=?', selParms, function(selErr, row) {
+          con.execute('select  ?, ?, ?, ? from CfUgly where key=?', selParms, function(selErr, rows) {
             con.close();
             if (selErr) {
               assert.ok(false);
             } else {
+              assert.strictEqual(rows.rowCount(), 1);
+              var row = rows[0];
               assert.strictEqual(4, row.colCount());
               
               assert.ok(row.colHash.normal.equals(new BigInteger('25')));
@@ -574,8 +594,10 @@ exports.testPooledConnection = function(test, assert) {
     if (err) { bail(conn, err); }
     
     for (var i = 0; i < 100; i++) {
-      conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, row) {
+      conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows) {
         if (err) { bail(conn, err); }
+        assert.strictEqual(rows.rowCount(), 1);
+        var row = rows[0];
         assert.strictEqual(row.cols[0].name, 'A');
       });
     }
