@@ -30,7 +30,7 @@ var System = require('../lib/system').System;
 var KsDef = require('../lib/system').KsDef;
 var CfDef = require('../lib/system').CfDef;
 
-var CASSANDRA_PORT = 9170;
+var CASSANDRA_PORT = 19170;
 
 function stringToHex(s) {
   var buf = '';
@@ -586,7 +586,7 @@ exports.testPooledConnection = function(test, assert) {
   }
   
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
-  var hosts = ["127.0.0.1:9170"];
+  var hosts = ["127.0.0.1:19170"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
   
   // Hammer time...
