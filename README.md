@@ -47,7 +47,7 @@ Using It
 This example assumes you have strings for keys, column names and values:
 
     var Connection = require('node-cassandra-client').Connection;
-    var con = new Connection('cassandra-host', 9160, 'Keyspace1', 'user', 'password');
+    var con = new Connection({host:'cassandra-host', port:9160, keyspace:'Keyspace1', user:'user', pass:'password'});
     con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
         if (err) {
             // handle error
@@ -55,6 +55,15 @@ This example assumes you have strings for keys, column names and values:
             // handle success.
         }
 	});
+	
+The `Connection` constructor accepts the following properties:
+
+    host:        cassandra host
+    port:        cassandra port
+    keyspace:    cassandra keyspace
+    user:        [optional] cassandra user
+    pass:        [optional] cassandra password
+    use_bigints: [optional] boolean. toggles whether or not BigInteger or Number instances are in results.
 
 ### Getting data (single row result)
 
@@ -95,6 +104,7 @@ PooledConnection() accepts an objects with these slots:
           pass : Password for authentication (optional).
        maxSize : Maximum number of connection to pool (optional).
     idleMillis : Idle connection timeout in milliseconds (optional).
+    use_bigints: boolean indicating whether or not to use BigInteger or Number in numerical results.
 
 Queries are performed using the `execute()` method in the same manner as `Connection`,
 (see above).  For example:
