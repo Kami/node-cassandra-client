@@ -192,6 +192,72 @@ exports.testSimpleDelete = function(test, assert) {
   });
 };
 
+exports.testLongNoBigint = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      assert.ok(true);
+      assert.strictEqual(con.options.use_bigints, true);
+      con.options.use_bigints = false;
+      assert.strictEqual(con.options.use_bigints, false);
+      
+      var updParms = [1,2,99];
+      con.execute('update CfLong set ?=? where key=?', updParms, function(updErr) {
+        if (updErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select ? from CfLong where key=?', [1, 99], function(selErr, rows) {
+            con.close();
+            assert.strictEqual(rows.rowCount(), 1);
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(1, row.cols[0].name);
+            assert.strictEqual(2, row.cols[0].value);
+            test.finish();
+          });
+        }
+      });
+    }
+  });
+};
+
+exports.testIntNoBigint = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      assert.ok(true);
+      assert.strictEqual(con.options.use_bigints, true);
+      con.options.use_bigints = false;
+      assert.strictEqual(con.options.use_bigints, false);
+      
+      var updParms = [1,2,99];
+      con.execute('update CfInt set ?=? where key=?', updParms, function(updErr) {
+        if (updErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select ? from CfInt where key=?', [1, 99], function(selErr, rows) {
+            con.close();
+            assert.strictEqual(rows.rowCount(), 1);
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(1, row.cols[0].name);
+            assert.strictEqual(2, row.cols[0].value);
+            test.finish();
+          });
+        }
+      });
+    }
+  });
+};
+
 exports.testLong = function(test, assert) {
   connect(function(err, con) {
     if (err) {
