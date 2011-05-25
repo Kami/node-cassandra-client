@@ -49,7 +49,7 @@ function connect(callback) {
   handler.on('ready', function(con) {
     callback(null, con);
   });
-  var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
+  var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'Keyspace1', null, null, {use_bigints: true});
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -238,7 +238,7 @@ exports.testLong = function(test, assert) {
   });
 };
 
-exports.testSlice = function(test, assert) {
+exports.ZtestSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -271,7 +271,7 @@ exports.testSlice = function(test, assert) {
   }); 
 };
 
-exports.testReverseSlice = function(test, assert) {
+exports.ZtestReverseSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -304,7 +304,7 @@ exports.testReverseSlice = function(test, assert) {
   });
 };
 
-exports.testReversedSliceLimit = function(test, assert) {
+exports.ZtestReversedSliceLimit = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -339,7 +339,7 @@ exports.testReversedSliceLimit = function(test, assert) {
   });
 };
 
-exports.testReversedSlice = function(test, assert) {
+exports.ZtestReversedSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -372,7 +372,7 @@ exports.testReversedSlice = function(test, assert) {
   });
 };
 
-exports.testInt = function(test, assert) {
+exports.ZtestInt = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -415,7 +415,7 @@ exports.testInt = function(test, assert) {
   });
 };
 
-exports.testUUID = function(test, assert) {
+exports.ZtestUUID = function(test, assert) {
   // make sure we're not comparing the same things.
   assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
   assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
@@ -460,7 +460,7 @@ exports.testUUID = function(test, assert) {
   });
 };
 
-exports.testCustomValidators = function(test, assert) {
+exports.ZtestCustomValidators = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -498,11 +498,11 @@ exports.testCustomValidators = function(test, assert) {
 
 // this test only works an order-preserving partitioner.
 // it also uses an event-based approach to doing things.
-//exports.DISABLED_testMultipleRows = function(test, assert) {
+//exports.ZDISABLED_testMultipleRows = function(test, assert) {
 //  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
 //  // what I expect.
 //  
-//  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system');
+//  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system', null, null, {use_bigints: true});
 //  sys.connect(function(err) {
 //    if (err) {
 //      assert.ok(false)
@@ -522,7 +522,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('ksready', function() {
 //        console.log('keyspace created');
 //        sys.close();
-//        var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'ints');
+//        var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'ints', null, null, {use_bigints: true});
 //        con.execute('create columnfamily cfints (key int primary key) with comparator=int and default_validation=int', null, function(err) {
 //          con.close();
 //          if (err) {
@@ -538,7 +538,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('cfready', function() {
 //        
 //        // insert 100 rows.
-//        var con = new Connection('127.0.0.1', 9160, 'ints');
+//        var con = new Connection('127.0.0.1', 9160, 'ints', null, null, {use_bigints: true});
 //        var count = 100;
 //        var num = 0;
 //        for (var i = 0; i < count; i++) {
@@ -587,7 +587,7 @@ exports.testPooledConnection = function(test, assert) {
   
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
   var hosts = ["127.0.0.1:19170"];
-  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
   
   // Hammer time...
   conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
