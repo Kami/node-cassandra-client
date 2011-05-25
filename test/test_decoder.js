@@ -17,7 +17,7 @@
 
 
 var BigInteger = require('../lib/bigint').BigInteger;
-var bytesToLong = require('../lib/decoder').bytesToLong;
+var bytesToBigLong = require('../lib/decoder').bytesToBigLong;
 
 // friggen big integer library is broken.
 exports.testBigIntegerBrokenness = function(test, assert) {
@@ -35,25 +35,25 @@ exports.testBigIntegerBrokenness = function(test, assert) {
   // equality should be achived.
   assert.ok(!zero1.equals(zero2));
   
-  // instead, we need to rely on bytesToLong to return the right thing.
-  assert.ok(zero2.equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
+  // instead, we need to rely on bytesToBigLong to return the right thing.
+  assert.ok(zero2.equals(bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
   
   test.finish();
 };
 
 exports.testLongConversion = function(test, assert) {
-  assert.ok(bytesToLong);
+  assert.ok(bytesToBigLong);
   // we have to compare against strings.
-  assert.ok(new BigInteger('0').equals(bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
-  assert.strictEqual('0', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').toString()); // 1
-  assert.strictEqual('1', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001').toString()); // 1
-  assert.strictEqual('2', bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002').toString()); // 2
-  assert.strictEqual('255' ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ').toString()); // 255
-  assert.strictEqual('2550' ,bytesToLong('\u0000\u0000\u0000\u0000\u0000\u0000\tö').toString()); // 2550
-  assert.strictEqual('8025521', bytesToLong('\u0000\u0000\u0000\u0000\u0000zu±').toString()); // 8025521
-  assert.strictEqual('218025521', bytesToLong('\u0000\u0000\u0000\u0000\fþÎ1').toString()); // 218025521
-  assert.strictEqual('6544218025521', bytesToLong('\u0000\u0000\u0005ó±Ên1').toString()); // 6544218025521
-  assert.strictEqual('8776496549718025521', bytesToLong('yÌa\u001c²be1').toString()); // 8776496549718025521
+  assert.ok(new BigInteger('0').equals(bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000')));
+  assert.strictEqual('0', bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').toString()); // 1
+  assert.strictEqual('1', bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001').toString()); // 1
+  assert.strictEqual('2', bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002').toString()); // 2
+  assert.strictEqual('255' ,bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ').toString()); // 255
+  assert.strictEqual('2550' ,bytesToBigLong('\u0000\u0000\u0000\u0000\u0000\u0000\tö').toString()); // 2550
+  assert.strictEqual('8025521', bytesToBigLong('\u0000\u0000\u0000\u0000\u0000zu±').toString()); // 8025521
+  assert.strictEqual('218025521', bytesToBigLong('\u0000\u0000\u0000\u0000\fþÎ1').toString()); // 218025521
+  assert.strictEqual('6544218025521', bytesToBigLong('\u0000\u0000\u0005ó±Ên1').toString()); // 6544218025521
+  assert.strictEqual('8776496549718025521', bytesToBigLong('yÌa\u001c²be1').toString()); // 8776496549718025521
   
   test.finish();
 };
