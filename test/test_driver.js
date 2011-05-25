@@ -114,6 +114,22 @@ exports.testWhiskyIsWorking = function(test, assert) {
   test.finish();
 }
 
+exports.testNoResults = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ifError(err);
+      test.finish();
+    } else {
+      con.execute('select * from CfLong where key=999999999', [], function(err, rows) {
+        con.close();
+        assert.strictEqual(rows, null);
+        assert.ok(err);
+        test.finish();
+      });
+    }
+  });
+};
+
 exports.testSimpleUpdate = function(test, assert) {
   connect(function(err, con) {
     if (err) {
