@@ -238,7 +238,7 @@ exports.testLong = function(test, assert) {
   });
 };
 
-exports.ZtestSlice = function(test, assert) {
+exports.testSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -271,7 +271,7 @@ exports.ZtestSlice = function(test, assert) {
   }); 
 };
 
-exports.ZtestReverseSlice = function(test, assert) {
+exports.testReverseSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -304,7 +304,7 @@ exports.ZtestReverseSlice = function(test, assert) {
   });
 };
 
-exports.ZtestReversedSliceLimit = function(test, assert) {
+exports.testReversedSliceLimit = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -339,7 +339,7 @@ exports.ZtestReversedSliceLimit = function(test, assert) {
   });
 };
 
-exports.ZtestReversedSlice = function(test, assert) {
+exports.testReversedSlice = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -372,7 +372,7 @@ exports.ZtestReversedSlice = function(test, assert) {
   });
 };
 
-exports.ZtestInt = function(test, assert) {
+exports.testInt = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -415,7 +415,7 @@ exports.ZtestInt = function(test, assert) {
   });
 };
 
-exports.ZtestUUID = function(test, assert) {
+exports.testUUID = function(test, assert) {
   // make sure we're not comparing the same things.
   assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
   assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
@@ -460,7 +460,7 @@ exports.ZtestUUID = function(test, assert) {
   });
 };
 
-exports.ZtestCustomValidators = function(test, assert) {
+exports.testCustomValidators = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
