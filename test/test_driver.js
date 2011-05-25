@@ -122,8 +122,9 @@ exports.testNoResults = function(test, assert) {
     } else {
       con.execute('select * from CfLong where key=999999999', [], function(err, rows) {
         con.close();
-        assert.strictEqual(rows, null);
-        assert.ok(err);
+        assert.ok(rows);
+        assert.strictEqual(rows.rowCount(), 0);
+        assert.strictEqual(err, null);
         test.finish();
       });
     }
