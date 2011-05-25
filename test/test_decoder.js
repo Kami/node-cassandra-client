@@ -18,6 +18,7 @@
 
 var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToBigLong = require('../lib/decoder').bytesToBigLong;
+var bytesToNum = require('../lib/decoder').bytesToNum;
 
 // friggen big integer library is broken.
 exports.testBigIntegerBrokenness = function(test, assert) {
@@ -41,6 +42,25 @@ exports.testBigIntegerBrokenness = function(test, assert) {
   test.finish();
 };
 
+exports.testNumConversion = function(test, assert) {
+  assert.strictEqual('0', bytesToNum('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0000').toString()); // 1
+  assert.strictEqual('1', bytesToNum('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0001').toString()); // 1
+  assert.strictEqual('2', bytesToNum('\u0000\u0000\u0000\u0000\u0000\u0000\u0000\u0002').toString()); // 2
+  assert.strictEqual('255' ,bytesToNum('\u0000\u0000\u0000\u0000\u0000\u0000\u0000ÿ').toString()); // 255
+  assert.strictEqual('2550' ,bytesToNum('\u0000\u0000\u0000\u0000\u0000\u0000\tö').toString()); // 2550
+  assert.strictEqual('8025521', bytesToNum('\u0000\u0000\u0000\u0000\u0000zu±').toString()); // 8025521
+  assert.strictEqual('218025521', bytesToNum('\u0000\u0000\u0000\u0000\fþÎ1').toString()); // 218025521
+  
+  // these values ensure that none 8 byte sequences work as well.
+  assert.strictEqual(2147483647, bytesToNum('\u007f\u00ff\u00ff\u00ff')); // [127,-1,-1,-1]
+  assert.strictEqual(-2147483648, bytesToNum('\u0080\u0000\u0000\u0000')); // [-128,0,0,0]
+  assert.strictEqual(-1, bytesToNum('\u00ff')); // [-1]
+  assert.strictEqual(1, bytesToNum('\u0001')); // [1]
+  
+  assert.strictEqual('-1', bytesToNum('ÿÿÿÿÿÿÿÿ').toString());
+  test.finish();
+}
+
 exports.testLongConversion = function(test, assert) {
   assert.ok(bytesToBigLong);
   // we have to compare against strings.
@@ -54,6 +74,7 @@ exports.testLongConversion = function(test, assert) {
   assert.strictEqual('218025521', bytesToBigLong('\u0000\u0000\u0000\u0000\fþÎ1').toString()); // 218025521
   assert.strictEqual('6544218025521', bytesToBigLong('\u0000\u0000\u0005ó±Ên1').toString()); // 6544218025521
   assert.strictEqual('8776496549718025521', bytesToBigLong('yÌa\u001c²be1').toString()); // 8776496549718025521
+  assert.strictEqual('-1', bytesToBigLong('ÿÿÿÿÿÿÿÿ').toString()); // -1
   
   test.finish();
 };
