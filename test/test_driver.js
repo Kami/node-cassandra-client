@@ -49,7 +49,10 @@ function connect(callback) {
   handler.on('ready', function(con) {
     callback(null, con);
   });
-  var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'Keyspace1', null, null, {use_bigints: true});
+  var con = new Connection({host: '127.0.0.1', 
+                            port: CASSANDRA_PORT, 
+                            keyspace: 'Keyspace1', 
+                            use_bigints: true});
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -199,9 +202,9 @@ exports.testLongNoBigint = function(test, assert) {
       test.finish();
     } else {
       assert.ok(true);
-      assert.strictEqual(con.options.use_bigints, true);
-      con.options.use_bigints = false;
-      assert.strictEqual(con.options.use_bigints, false);
+      assert.strictEqual(con.connectionInfo.use_bigints, true);
+      con.connectionInfo.use_bigints = false;
+      assert.strictEqual(con.connectionInfo.use_bigints, false);
       
       var updParms = [1,2,99];
       con.execute('update CfLong set ?=? where key=?', updParms, function(updErr) {
@@ -232,9 +235,9 @@ exports.testIntNoBigint = function(test, assert) {
       test.finish();
     } else {
       assert.ok(true);
-      assert.strictEqual(con.options.use_bigints, true);
-      con.options.use_bigints = false;
-      assert.strictEqual(con.options.use_bigints, false);
+      assert.strictEqual(con.connectionInfo.use_bigints, true);
+      con.connectionInfo.use_bigints = false;
+      assert.strictEqual(con.connectionInfo.use_bigints, false);
       
       var updParms = [1,2,99];
       con.execute('update CfInt set ?=? where key=?', updParms, function(updErr) {
