@@ -59,7 +59,7 @@ exports.testNumConversion = function(test, assert) {
   
   assert.strictEqual('-1', bytesToNum('ÿÿÿÿÿÿÿÿ').toString());
   test.finish();
-}
+};
 
 exports.testLongConversion = function(test, assert) {
   assert.ok(bytesToBigLong);

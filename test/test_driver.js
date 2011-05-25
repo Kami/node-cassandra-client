@@ -112,7 +112,7 @@ exports.testWhiskyIsWorking = function(test, assert) {
       assert.ok(false);
   }, require('assert').AssertionError);
   test.finish();
-}
+};
 
 exports.testNoResults = function(test, assert) {
   connect(function(err, con) {
@@ -407,7 +407,7 @@ exports.testReversedSliceLimit = function(test, assert) {
               assert.ok(false);              
             } else {
               assert.strictEqual(rows.rowCount(), 1);
-              var row = rows[0]
+              var row = rows[0];
               assert.strictEqual(3, row.colCount());
               assert.ok(row.cols[1].name.equals(new BigInteger('1')));
               assert.ok(row.cols[1].value.equals(new BigInteger('11')));
