@@ -30,7 +30,7 @@ var System = require('../lib/system').System;
 var KsDef = require('../lib/system').KsDef;
 var CfDef = require('../lib/system').CfDef;
 
-var CASSANDRA_PORT = 9170;
+var CASSANDRA_PORT = 19170;
 
 function stringToHex(s) {
   var buf = '';
@@ -49,7 +49,10 @@ function connect(callback) {
   handler.on('ready', function(con) {
     callback(null, con);
   });
-  var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'Keyspace1');
+  var con = new Connection({host: '127.0.0.1', 
+                            port: CASSANDRA_PORT, 
+                            keyspace: 'Keyspace1', 
+                            use_bigints: true});
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -109,7 +112,24 @@ exports.testWhiskyIsWorking = function(test, assert) {
       assert.ok(false);
   }, require('assert').AssertionError);
   test.finish();
-}
+};
+
+exports.testNoResults = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ifError(err);
+      test.finish();
+    } else {
+      con.execute('select * from CfLong where key=999999999', [], function(err, rows) {
+        con.close();
+        assert.ok(rows);
+        assert.strictEqual(rows.rowCount(), 0);
+        assert.strictEqual(err, null);
+        test.finish();
+      });
+    }
+  });
+};
 
 exports.testSimpleUpdate = function(test, assert) {
   connect(function(err, con) {
@@ -185,6 +205,72 @@ exports.testSimpleDelete = function(test, assert) {
                 test.finish();
               });
             }
+          });
+        }
+      });
+    }
+  });
+};
+
+exports.testLongNoBigint = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      assert.ok(true);
+      assert.strictEqual(con.connectionInfo.use_bigints, true);
+      con.connectionInfo.use_bigints = false;
+      assert.strictEqual(con.connectionInfo.use_bigints, false);
+      
+      var updParms = [1,2,99];
+      con.execute('update CfLong set ?=? where key=?', updParms, function(updErr) {
+        if (updErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select ? from CfLong where key=?', [1, 99], function(selErr, rows) {
+            con.close();
+            assert.strictEqual(rows.rowCount(), 1);
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(1, row.cols[0].name);
+            assert.strictEqual(2, row.cols[0].value);
+            test.finish();
+          });
+        }
+      });
+    }
+  });
+};
+
+exports.testIntNoBigint = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      assert.ok(true);
+      assert.strictEqual(con.connectionInfo.use_bigints, true);
+      con.connectionInfo.use_bigints = false;
+      assert.strictEqual(con.connectionInfo.use_bigints, false);
+      
+      var updParms = [1,2,99];
+      con.execute('update CfInt set ?=? where key=?', updParms, function(updErr) {
+        if (updErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select ? from CfInt where key=?', [1, 99], function(selErr, rows) {
+            con.close();
+            assert.strictEqual(rows.rowCount(), 1);
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(1, row.cols[0].name);
+            assert.strictEqual(2, row.cols[0].value);
+            test.finish();
           });
         }
       });
@@ -322,7 +408,7 @@ exports.testReversedSliceLimit = function(test, assert) {
               assert.ok(false);              
             } else {
               assert.strictEqual(rows.rowCount(), 1);
-              var row = rows[0]
+              var row = rows[0];
               assert.strictEqual(3, row.colCount());
               assert.ok(row.cols[1].name.equals(new BigInteger('1')));
               assert.ok(row.cols[1].value.equals(new BigInteger('11')));
@@ -498,11 +584,11 @@ exports.testCustomValidators = function(test, assert) {
 
 // this test only works an order-preserving partitioner.
 // it also uses an event-based approach to doing things.
-//exports.DISABLED_testMultipleRows = function(test, assert) {
+//exports.ZDISABLED_testMultipleRows = function(test, assert) {
 //  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
 //  // what I expect.
 //  
-//  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system');
+//  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system', null, null, {use_bigints: true});
 //  sys.connect(function(err) {
 //    if (err) {
 //      assert.ok(false)
@@ -522,7 +608,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('ksready', function() {
 //        console.log('keyspace created');
 //        sys.close();
-//        var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'ints');
+//        var con = new Connection('127.0.0.1', CASSANDRA_PORT, 'ints', null, null, {use_bigints: true});
 //        con.execute('create columnfamily cfints (key int primary key) with comparator=int and default_validation=int', null, function(err) {
 //          con.close();
 //          if (err) {
@@ -538,7 +624,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('cfready', function() {
 //        
 //        // insert 100 rows.
-//        var con = new Connection('127.0.0.1', 9160, 'ints');
+//        var con = new Connection('127.0.0.1', 9160, 'ints', null, null, {use_bigints: true});
 //        var count = 100;
 //        var num = 0;
 //        for (var i = 0; i < count; i++) {
@@ -586,8 +672,8 @@ exports.testPooledConnection = function(test, assert) {
   }
   
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
-  var hosts = ["127.0.0.1:9170"];
-  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+  var hosts = ["127.0.0.1:19170"];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
   
   // Hammer time...
   conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
