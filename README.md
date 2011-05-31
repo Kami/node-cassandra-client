@@ -65,19 +65,7 @@ The `Connection` constructor accepts the following properties:
     pass:        [optional] cassandra password
     use_bigints: [optional] boolean. toggles whether or not BigInteger or Number instances are in results.
 
-### Getting data (single row result)
-
-    con.execute('SELECT ? FROM Standard1 WHERE key=?', ['cola', 'key0'], function(err, row) {
-        if (err) {
-            // handle error
-        } else {
-            assert.ok(row.colHash['cola']);
-            assert.ok(row.cols[0].name === 'cola');
-            assert.ok(row.cols[0].value === 'valuea');
-        }
-    });
-
-### Getting data (multiple rows)
+### Getting data
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
 Assume the updates have happened previously.
 
@@ -86,7 +74,11 @@ Assume the updates have happened previously.
 			// handle error
 		} else {
 			console.log(rows.rowCount());
-			console.log(rows[0]); // behaves just like row in the above example.
+			console.log(rows[0]);
+                        assert.strictEqual(rows[0].colCount(), 1);
+                        assert.ok(rows[0].colHash['cola']);
+                        assert.ok(rows[0].cols[0].name === 'cola');
+                        assert.ok(rows[0].cols[0].value === 'valuea');
 		}
 	});
 	
