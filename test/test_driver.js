@@ -87,8 +87,9 @@ exports.setUp = function(test, assert) {
                                 new ttypes.ColumnDef({name: 'string_col', validation_class: 'UTF8Type'}),
                                 new ttypes.ColumnDef({name: 'uuid_col', validation_class: 'TimeUUIDType'})
                               ]});
+      var cfCounter = new CfDef({keyspace: ksName, name: 'CfCounter', column_type: 'Standard', comparator_type: 'AsciiType', default_validation_class: 'CounterColumnType', key_validation_class: 'AsciiType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid, cfUgly]});
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid, cfUgly, cfCounter]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
         close();
@@ -104,6 +105,23 @@ exports.setUp = function(test, assert) {
       console.log(ksDef.name + ' keyspace already exists');
       test.finish();
     }
+  });
+};
+
+exports.tearDown = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ifError(err);
+      con.close();
+      test.finish();
+      return;
+    }
+
+    con.execute('DROP KEYSPACE ?', ['Keyspace1'], function(dropErr, res) {
+      assert.ifError(dropErr);
+      con.close();
+      test.finish();
+    });
   });
 };
 
@@ -156,6 +174,35 @@ exports.testSimpleUpdate = function(test, assert) {
         }
       });
     }
+  });
+};
+
+exports.testCounterUpdate = function(test, assert) {
+  connect(function(err0, con) {
+    assert.ifError(err0);
+    con.execute('UPDATE CfCounter SET ? = ? + 3 WHERE KEY = ?',
+                ['a', 'a', 'test'],
+                function(err1, res0) {
+                  if (err1) {
+                    con.close();
+                    assert.ifError(err1);
+                    test.finish();
+                  } else {
+                    con.execute('SELECT ? FROM CfCounter WHERE KEY = ?',
+                                ['a', 'test'],
+                                function(err2, res1) {
+                                  if (err2) {
+                                    con.close();
+                                    assert.ifError(err2);
+                                    test.finish();
+                                  } else {
+                                    con.close();
+                                    assert.strictEqual(res1[0].colHash['a'].toString(), '3');
+                                    test.finish();
+                                  }
+                                });
+                  }
+                });
   });
 };
 
