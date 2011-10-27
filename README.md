@@ -1,12 +1,3 @@
-THIS PROJECT HAS MOVED
-====================
-
-
-node-cassandra-client has moved to apache extras: http://code.google.com/a/apache-extras.org/p/cassandra-node/
-
-The code on this github project will no longer be maintained.
-
-
 node-cassandra-client
 ====================
 
