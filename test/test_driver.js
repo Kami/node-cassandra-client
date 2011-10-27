@@ -32,6 +32,22 @@ var CfDef = require('../lib/system').CfDef;
 
 var CASSANDRA_PORT = 19170;
 
+function merge(a, b) {
+  var c = {}, attrname;
+
+  for (attrname in a) {
+    if (a.hasOwnProperty(attrname)) {
+      c[attrname] = a[attrname];
+    }
+  }
+  for (attrname in b) {
+    if (b.hasOwnProperty(attrname)) {
+      c[attrname] = b[attrname];
+    }
+  }
+  return c;
+};
+
 function stringToHex(s) {
   var buf = '';
   for (var i = 0; i < s.length; i++) {
@@ -41,7 +57,19 @@ function stringToHex(s) {
 }
 
 
-function connect(callback) {
+function connect(options, callback) {
+  if (typeof options === 'function') {
+      callback = options;
+      options = {};
+  }
+
+  var defaultOptions = {
+      host: '127.0.0.1',
+      port: CASSANDRA_PORT,
+      keyspace: 'Keyspace1',
+      use_bigints: true
+  };
+  var connOptions = merge(defaultOptions, options);
   var handler = new EventEmitter();
   handler.on('error', function(err) {
     callback(err, null);
@@ -49,10 +77,7 @@ function connect(callback) {
   handler.on('ready', function(con) {
     callback(null, con);
   });
-  var con = new Connection({host: '127.0.0.1', 
-                            port: CASSANDRA_PORT, 
-                            keyspace: 'Keyspace1', 
-                            use_bigints: true});
+  var con = new Connection(connOptions);
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -174,6 +199,26 @@ exports.testSimpleUpdate = function(test, assert) {
         }
       });
     }
+  });
+};
+
+exports.testConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
+  connect({keyspace: 'doesnotexist.'}, function(err, conn) {
+    assert.ok(err);
+    assert.equal(err.name, 'NotFoundException');
+    assert.ok(!conn);
+    test.finish();
+  });
+};
+
+exports.testPooledConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
+  var con = new PooledConnection({hosts: ['127.0.0.1:19170'],
+                                  keyspace: 'doesNotExist.',
+                                  use_bigints: false});
+  con.execute('SELECT * FROM foo', [], function(err) {
+    assert.ok(err);
+    assert.equal(err.name, 'NotFoundException');
+    test.finish();
   });
 };
 
