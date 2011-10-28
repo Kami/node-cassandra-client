@@ -192,8 +192,8 @@ exports.testSimpleUpdate = function(test, assert) {
             assert.ifError(selectErr);
             assert.strictEqual(rows.rowCount(), 1);
             var row = rows[0];
-            assert.strictEqual('cola', row.cols[0].name);
-            assert.strictEqual('valuea', row.cols[0].value);
+            assert.strictEqual('cola', row.cols[0].name.toString());
+            assert.strictEqual('valuea', row.cols[0].value.toString());
             test.finish();
           });
         }
@@ -673,7 +673,7 @@ exports.testCustomValidators = function(test, assert) {
               
               assert.ok(row.colHash.normal.equals(new BigInteger('25')));
               assert.ok(row.colHash.int_col.equals(new BigInteger('21')));
-              assert.ok(row.colHash.string_col === 'test_string_value');
+              assert.ok(row.colHash.string_col.toString() === 'test_string_value');
               assert.ok(row.colHash.uuid_col.toString() == '6f8483b0-65e0-11e0-0000-fe8ebeead9fe');
             }
             test.finish();
@@ -786,7 +786,7 @@ exports.testPooledConnection = function(test, assert) {
         if (err) { bail(conn, err); }
         assert.strictEqual(rows.rowCount(), 1);
         var row = rows[0];
-        assert.strictEqual(row.cols[0].name, 'A');
+        assert.strictEqual(row.cols[0].name.toString(), 'A');
       });
     }
     

@@ -23,6 +23,7 @@
     "node": ">= 0.4.0"
   },
   "dependencies" : {
+    "async": ">= 0.1.12",
     "thrift" : ">= 0.6.0",
     "logmagic": ">= 0.1.1",
     "generic-pool" : ">= 1.0.7",
