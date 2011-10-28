@@ -213,7 +213,8 @@ exports.testConnectToBadUrl = function(test, assert) {
 exports.testConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
   connect({keyspace: 'doesnotexist.'}, function(err, conn) {
     assert.ok(err);
-    assert.equal(err.toString(), 'NotFoundException');
+    assert.equal(err.name, 'NotFoundException')
+    assert.equal(err.message, 'ColumnFamily or Keyspace does not exist');
     assert.ok(!conn);
     test.finish();
   });
@@ -225,7 +226,8 @@ exports.testPooledConnectionKeyspaceDoesNotExistConnect = function(test, assert)
                                   use_bigints: false});
   con.execute('SELECT * FROM foo', [], function(err) {
     assert.ok(err);
-    assert.equal(err.toString(), 'NotFoundException');
+    assert.equal(err.name, 'NotFoundException')
+    assert.equal(err.message, 'ColumnFamily or Keyspace does not exist');
     test.finish();
   });
 };
