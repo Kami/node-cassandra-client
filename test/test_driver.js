@@ -20,6 +20,9 @@ var assert = require('assert');
 var console = require('console');
 var EventEmitter = require('events').EventEmitter;
 
+var logmagic = require('logmagic');
+var async = require('async');
+
 var BigInteger = require('../lib/bigint').BigInteger;
 
 var Connection = require('../lib/driver').Connection;
@@ -799,6 +802,62 @@ exports.testPooledConnection = function(test, assert) {
     });
   });
 };
+
+exports.testTimeLogging = function(test, assert) {
+  var hosts = ["127.0.0.1:19170"];
+  var baseOptions = {'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true};
+  var options1 = merge(baseOptions, {});
+  var options2 = merge(baseOptions, {'log_time': true});
+  var conn1 = new PooledConnection(options1);
+  var conn2 = new PooledConnection(options2);
+
+  var logObjsCql = [];
+  var logObjsTime = [];
+
+  logmagic.registerSink('cql_sink', function(module, level, message, obj) {
+    logObjsCql.push(arguments);
+  });
+
+  logmagic.registerSink('timing_sink', function(module, level, message, obj) {
+    logObjsTime.push(arguments);
+  });
+
+  logmagic.route('node-cassandra-client.driver.cql', logmagic.TRACE1, 'cql_sink');
+  logmagic.route('node-cassandra-client.driver.timing', logmagic.TRACE1, 'timing_sink');
+
+  conn1.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+    var logObj;
+    assert.ifError(err);
+
+    // Timing log is disabled, logObjs should be empty.
+    assert.equal(logObjsCql.length, 1);
+    assert.equal(logObjsTime.length, 0);
+
+    logObj = logObjsCql[0];
+    assert.ok(logObj[3].hasOwnProperty('query'));
+    assert.ok(logObj[3].hasOwnProperty('parameterized_query'));
+    assert.ok(logObj[3].hasOwnProperty('args'));
+    assert.ok(!logObj[3].hasOwnProperty('time'));
+
+    conn2.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows) {
+      var logObj;
+      assert.ifError(err);
+      assert.strictEqual(rows.rowCount(), 1);
+
+      // Timing log is enabled, logObjs should have 1 item
+      assert.equal(logObjsCql.length, 2);
+      assert.equal(logObjsTime.length, 1);
+      logObj = logObjsTime[0];
+
+      assert.ok(logObj[3].hasOwnProperty('query'));
+      assert.ok(logObj[3].hasOwnProperty('parameterized_query'));
+      assert.ok(logObj[3].hasOwnProperty('args'));
+      assert.ok(logObj[3].hasOwnProperty('time'));
+
+      conn1.shutdown();
+      conn2.shutdown();
+      test.finish();
+    });
   });
 };
 
