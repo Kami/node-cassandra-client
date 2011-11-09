@@ -777,21 +777,28 @@ exports.testPooledConnection = function(test, assert) {
   var hosts = ["127.0.0.1:19170"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
   
+  var range = new Array(100).join(' ').split(' ');
+
   // Hammer time...
   conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
     if (err) { bail(conn, err); }
-    
-    for (var i = 0; i < 100; i++) {
+
+    async.forEach(range, function (_, callback) {
       conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows) {
         if (err) { bail(conn, err); }
         assert.strictEqual(rows.rowCount(), 1);
         var row = rows[0];
         assert.strictEqual(row.cols[0].name.toString(), 'A');
+        callback();
       });
-    }
-    
-    conn.shutdown();
-    test.finish();
+    },
+
+    function(err) {
+      conn.shutdown();
+      test.finish();
+    });
+  });
+};
   });
 };
 
