@@ -19,6 +19,7 @@
 var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToBigLong = require('../lib/decoder').bytesToBigLong;
 var bytesToNum = require('../lib/decoder').bytesToNum;
+var UUID = require('uuid-js');
 
 function makeBuffer(string) {
   return new Buffer(string, 'binary');
@@ -222,6 +223,7 @@ public class TestBigInt {
 };
 
 exports.testUUID = function(test, assert) {
+
   /* from java:
   ddf09190-6612-11e0-0000-fe8ebeead9f8->[221,240,145,144,102,18,17,224,0,0,254,142,190,234,217,248,] 
   ddf0b8a0-6612-11e0-0000-1e4e5d5425fc->[221,240,184,160,102,18,17,224,0,0,30,78,93,84,37,252,]      
@@ -236,7 +238,7 @@ exports.testUUID = function(test, assert) {
 
   assert.strictEqual(strings.length, arrays.length);
   for (var i = 0; i < strings.length; i++) {
-    assert.deepEqual(new UUID('string', strings[i]).bytes, arrays[i]);
+    assert.deepEqual( UUID.fromURN(strings[i]), UUID.fromBytes(arrays[i]) );
   }
   test.finish();
 };

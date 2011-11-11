@@ -605,8 +605,8 @@ exports.testInt = function(test, assert) {
 
 exports.testUUID = function(test, assert) {
   // make sure we're not comparing the same things.
-  assert.ok(!new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
-  assert.ok(!new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(new UUID('string', 'fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
+  assert.ok(!UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
+  assert.ok(!UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(UUID.fromURN('fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -630,14 +630,14 @@ exports.testUUID = function(test, assert) {
               var row = rows[0];
               assert.strictEqual(2, row.colCount());
               
-              assert.ok(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
-              assert.ok(new UUID('string', '6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
-              assert.ok(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
-              assert.ok(new UUID('string', '6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
+              assert.ok(UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
+              assert.ok(UUID.fromURN('6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
+              assert.ok(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
+              assert.ok(UUID.fromURN('6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
               
-              assert.ok(row.colHash[(new UUID('string', '6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
+              assert.ok(row.colHash[(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
               assert.ok(row.colHash[(row.cols[0].name)].equals(row.cols[0].value));
-              assert.ok(row.colHash[(new UUID('string', '6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
+              assert.ok(row.colHash[(UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
               assert.ok(row.colHash[(row.cols[1].name)].equals(row.cols[1].value));
             }
             test.finish();
@@ -726,7 +726,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('cfready', function() {
 //        
 //        // insert 100 rows.
-//        var con = new Connection('127.0.0.1', 9160, 'ints', null, null, {use_bigints: true});
+//        var con = new Connection('127.0.0.1', 19170, 'ints', null, null, {use_bigints: true});
 //        var count = 100;
 //        var num = 0;
 //        for (var i = 0; i < count; i++) {
