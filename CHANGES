@@ -1,0 +1,5 @@
+Changes with cassandra-client in development:
+
+- Set a timeout for connecting to the cassandra server. Default timeout
+  is 4000 ms, but a user can specify custom one by passing 'timeout'
+  option to the PooledConnection / Connection constructor.
