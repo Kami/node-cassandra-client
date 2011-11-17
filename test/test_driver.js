@@ -769,13 +769,38 @@ exports.testCustomValidators = function(test, assert) {
 //  });
 //};
 
+
+exports.testPooledConnectionFailover = function(test, assert) {
+  var server = null;
+  var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.2', '127.0.0.1:19170'];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
+
+  async.series([
+    function executeQueries(callback) {
+      conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+        assert.ifError(err);
+        callback();
+      });
+    }
+  ],
+
+  function(err) {
+    if (server) {
+      server.close();
+    }
+
+    conn.shutdown();
+    test.finish();
+  });
+};
+
 exports.testPooledConnection = function(test, assert) {
   function bail(conn, err) {
     conn.shutdown();
     assert.ifError(err);
     test.finish();
   }
-  
+
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
   var hosts = ["127.0.0.1:19170"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
