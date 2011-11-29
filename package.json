@@ -27,7 +27,7 @@
     "thrift" : ">= 0.6.0-1",
     "logmagic": ">= 0.1.1",
     "generic-pool" : ">= 1.0.7",
-    "whiskey": ">= 0.3.0",
+    "whiskey": ">= 0.6.1",
     "uuid-js": ">= 0.5.2"
   },
   "devDependencies": {},
