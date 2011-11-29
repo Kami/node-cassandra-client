@@ -4,5 +4,6 @@ out
 *.iml
 *.ipr
 *.iws
+test-*.log
 node_modules
 node_modules/*
