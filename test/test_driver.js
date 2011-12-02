@@ -19,6 +19,7 @@
 var assert = require('assert');
 var console = require('console');
 var EventEmitter = require('events').EventEmitter;
+var http = require('http');
 
 var logmagic = require('logmagic');
 var async = require('async');
@@ -771,13 +772,39 @@ exports.testCustomValidators = function(test, assert) {
 
 
 exports.testPooledConnectionFailover = function(test, assert) {
-  var server = null;
   var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.2', '127.0.0.1:19170'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
 
   async.series([
     function executeQueries(callback) {
       conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+        assert.ifError(err);
+        callback();
+      });
+    }
+  ],
+
+  function(err) {
+    conn.shutdown();
+    test.finish();
+  });
+};
+
+exports.testLearnStepTimeout = function(test, assert) {
+  var server = null;
+  var hosts = ['127.0.0.1:8688', '127.0.0.1:19170'];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
+
+  async.series([
+    function startHttpServer(callback) {
+      server = http.createServer(function (req, res) {
+        res.end('test\n');
+      });
+      server.listen(8688, '127.0.0.1', callback);
+    },
+
+      function executeQueryPooledConnection(callback) {
+        conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
         assert.ifError(err);
         callback();
       });
