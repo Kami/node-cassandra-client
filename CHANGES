@@ -1,5 +1,14 @@
-Changes with cassandra-client in development:
+Changes with cassandra-client 0.6.0:
+
+- Set a timeout for login, learn and use steps. Defaults to 1000ms, 2000ms and
+  1000ms respectively.
 
 - Set a timeout for connecting to the cassandra server. Default timeout
   is 4000 ms, but a user can specify custom one by passing 'timeout'
   option to the PooledConnection / Connection constructor.
+
+- Use a different route for logging CQL queries
+  (node-cassandra-client.driver.cql).
+
+- Add 'log_time' option and log query execution time if this option is true.
+  Timing is logged to 'node-cassandra-client.driver.timing' route.
