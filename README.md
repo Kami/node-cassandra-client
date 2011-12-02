@@ -64,6 +64,9 @@ The `Connection` constructor accepts the following properties:
     user:        [optional] cassandra user
     pass:        [optional] cassandra password
     use_bigints: [optional] boolean. toggles whether or not BigInteger or Number instances are in results.
+    timeout:     [optional] number. Connection timeout. Defaults to 4000ms.
+    log_time:    [optional] boolean. Log execution time for all the queries.
+                 Timing is logged to 'node-cassandra-client.driver.timing' route. Defaults to false.
 
 ### Getting data
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
@@ -97,6 +100,9 @@ PooledConnection() accepts an objects with these slots:
        maxSize : Maximum number of connection to pool (optional).
     idleMillis : Idle connection timeout in milliseconds (optional).
     use_bigints: boolean indicating whether or not to use BigInteger or Number in numerical results.
+    timeout:   : [optional] number. Connection timeout. Defaults to 4000ms.
+    log_time   : [optional] boolean. Log execution time for all the queries.
+                 Timing is logged to 'node-cassandra-client.driver.timing' route. Defaults to false.
 
 Queries are performed using the `execute()` method in the same manner as `Connection`,
 (see above).  For example:
