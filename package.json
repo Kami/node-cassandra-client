@@ -1,12 +1,14 @@
 {
   "author": "Gary Dusbabek <gdusbabek@gmail.com>",
   "contributors": [
-    "Eric Evans <eevans@rackspace.com>",
-    "Gary Dusbabek <gdusbabek@gmail.com>"
+    "Eric Evans <eevans@acunu.com>",
+    "Gary Dusbabek <gdusbabek@gmail.com>",
+    "Tomaž Muraus <tomaz@tomaz.me>",
+    "Patrick Negri <patrick@iugu.com.br>"
   ],
   "name": "cassandra-client",
   "description": "Node.js CQL driver for Apache Cassandra",
-  "version": "0.5.2",
+  "version": "0.6.0",
   "homepage": "https://github.com/racker/node-cassandra-client",
   "repository": {
     "type": "git",
