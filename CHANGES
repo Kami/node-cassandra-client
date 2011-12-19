@@ -1,3 +1,8 @@
+Changes with cassandra-client 0.6.1:
+
+- Attach 'connectionInfo' object to the error object which is passed to the
+  callbacks.
+
 Changes with cassandra-client 0.6.0:
 
 - Set a timeout for login, learn and use steps. Defaults to 1000ms, 2000ms and
