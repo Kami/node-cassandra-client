@@ -9,10 +9,10 @@
   "name": "cassandra-client",
   "description": "Node.js CQL driver for Apache Cassandra",
   "version": "0.6.1",
-  "homepage": "https://github.com/racker/node-cassandra-client",
+  "homepage": "http://code.google.com/a/apache-extras.org/p/cassandra-node/",
   "repository": {
     "type": "git",
-    "url": "git://github.com/racker/node-cassandra-client.git"
+    "url": "https://code.google.com/a/apache-extras.org/p/cassandra-node/"
   },
   "main": "node-cassandra-client",
   "directories": {
@@ -24,17 +24,17 @@
   "engines": {
     "node": ">= 0.4.0"
   },
-  "dependencies" : {
+  "dependencies": {
     "async": ">= 0.1.12",
-    "thrift" : ">= 0.6.0-1",
+    "thrift": ">= 0.6.0-1",
     "logmagic": ">= 0.1.1",
-    "generic-pool" : ">= 1.0.7",
+    "generic-pool": ">= 1.0.7",
     "whiskey": ">= 0.6.1",
     "uuid-js": ">= 0.5.2"
   },
   "devDependencies": {},
-  "licenses" : [
-    { "type" : "Apache",
-      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html" }
-  ]
+  "licenses" : [{
+    "type": "Apache",
+    "url": "http://www.apache.org/licenses/LICENSE-2.0.html"
+  }]
 }
