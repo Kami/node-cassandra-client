@@ -19,7 +19,7 @@
     "lib": "lib"
   },
   "scripts": {
-    "test": "whiskey --tests \"test/test_driver.js test/test_decoder.js test/test_uuid.js\" --dependencies test/dependencies.json"
+    "test": "whiskey --tests \"test/test_driver.js test/test_decoder.js test/test_uuid.js\" --dependencies test/dependencies.json --scope-leaks"
   },
   "engines": {
     "node": ">= 0.4.0"
