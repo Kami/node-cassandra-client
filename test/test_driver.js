@@ -610,8 +610,8 @@ exports.testInt = function(test, assert) {
 
 exports.testUUID = function(test, assert) {
   // make sure we're not comparing the same things.
-  assert.ok(!UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
-  assert.ok(!UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(UUID.fromURN('fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
+  assert.ok(!UUID.fromString('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff')));
+  assert.ok(!UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(UUID.fromString('fa6a8870-65fa-11e0-0000-fe8ebeead9fd')));
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
@@ -634,15 +634,15 @@ exports.testUUID = function(test, assert) {
               assert.strictEqual(rows.rowCount(), 1);
               var row = rows[0];
               assert.strictEqual(2, row.colCount());
-              
-              assert.ok(UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
-              assert.ok(UUID.fromURN('6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
-              assert.ok(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
-              assert.ok(UUID.fromURN('6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
-              
-              assert.ok(row.colHash[(UUID.fromURN('6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
+
+              assert.ok(UUID.fromString('6f8483b0-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].name));
+              assert.ok(UUID.fromString('6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
+              assert.ok(UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
+              assert.ok(UUID.fromString('6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
+             
+              assert.ok(row.colHash[(UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
               assert.ok(row.colHash[(row.cols[0].name)].equals(row.cols[0].value));
-              assert.ok(row.colHash[(UUID.fromURN('6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
+              assert.ok(row.colHash[(UUID.fromString('6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
               assert.ok(row.colHash[(row.cols[1].name)].equals(row.cols[1].value));
             }
             test.finish();
