@@ -214,7 +214,7 @@ exports.testSimpleUpdate = function(test, assert) {
 exports.testConnectToBadUrl = function(test, assert) {
   connect({port:19171}, function(err, con) {
     assert.ok(err);
-    assert.strictEqual(err.toString(), 'Error: ECONNREFUSED, Connection refused');
+    assert.strictEqual(err.code, 'ECONNREFUSED');
     test.finish();
   });
 };
