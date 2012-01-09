@@ -110,8 +110,8 @@ exports.setUp = function(test, assert) {
       var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
       var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
       var cfUuid = new CfDef({keyspace: ksName, name: 'CfUuid', column_type: 'Standard', comparator_type: 'TimeUUIDType', default_validation_class: 'TimeUUIDType', key_validation_class: 'TimeUUIDType'});
-      var cfUgly = new CfDef({keyspace: ksName, name: 'CfUgly', column_type: 'Standard', comparator_type: 'UTF8Type', 
-                              default_validation_class: 'LongType', key_validation_class: 'IntegerType', 
+      var cfUgly = new CfDef({keyspace: ksName, name: 'CfUgly', column_type: 'Standard', comparator_type: 'UTF8Type',
+                              default_validation_class: 'LongType', key_validation_class: 'IntegerType',
                               column_metadata: [
                                 new ttypes.ColumnDef({name: 'int_col', validation_class: 'IntegerType'}),
                                 new ttypes.ColumnDef({name: 'string_col', validation_class: 'UTF8Type'}),
@@ -292,7 +292,7 @@ exports.testSimpleDelete = function(test, assert) {
       con.execute('update Standard1 set ?=?, ?=? where key=?', ['colx', 'xxx', 'colz', 'bbb', key], function(updateErr) {
         if (updateErr) {
           con.close();
-          
+
         } else {
           con.execute('delete ?,? from Standard1 where key in (?)', ['colx', 'colz', key], function(delErr) {
             if (delErr) {
@@ -329,7 +329,7 @@ exports.testLongNoBigint = function(test, assert) {
       assert.strictEqual(con.connectionInfo.use_bigints, true);
       con.connectionInfo.use_bigints = false;
       assert.strictEqual(con.connectionInfo.use_bigints, false);
-      
+
       var updParms = [1,2,99];
       con.execute('update CfLong set ?=? where key=?', updParms, function(updErr) {
         if (updErr) {
@@ -362,7 +362,7 @@ exports.testIntNoBigint = function(test, assert) {
       assert.strictEqual(con.connectionInfo.use_bigints, true);
       con.connectionInfo.use_bigints = false;
       assert.strictEqual(con.connectionInfo.use_bigints, false);
-      
+
       var updParms = [1,2,99];
       con.execute('update CfInt set ?=? where key=?', updParms, function(updErr) {
         if (updErr) {
@@ -411,14 +411,14 @@ exports.testLong = function(test, assert) {
               assert.strictEqual(rows.rowCount(), 1);
               var row = rows[0];
               assert.strictEqual(3, row.colCount());
-              
+
               assert.ok(new BigInteger('1').equals(row.cols[0].name));
               assert.ok(new BigInteger('2').equals(row.cols[0].value));
               assert.ok(new BigInteger('3').equals(row.cols[1].name));
               assert.ok(new BigInteger('4').equals(row.cols[1].value));
               assert.ok(new BigInteger('4611686018427387904').equals(row.cols[2].name));
               assert.ok(new BigInteger('-4611686018427387904').equals(row.cols[2].value));
-              
+
               assert.ok(new BigInteger('2').equals(row.colHash['1']));
               assert.ok(new BigInteger('4').equals(row.colHash['3']));
               assert.ok(new BigInteger('-4611686018427387904').equals(row.colHash['4611686018427387904']));
@@ -461,7 +461,7 @@ exports.testSlice = function(test, assert) {
         }
       });
     }
-  }); 
+  });
 };
 
 exports.testReverseSlice = function(test, assert) {
@@ -512,7 +512,7 @@ exports.testReversedSliceLimit = function(test, assert) {
           con.execute('select first 3 REVERSED ?..? from CfLong where key=12345', [2, -2], function(selErr, rows) {
             con.close();
             if (selErr) {
-              assert.ok(false);              
+              assert.ok(false);
             } else {
               assert.strictEqual(rows.rowCount(), 1);
               var row = rows[0];
@@ -588,14 +588,14 @@ exports.testInt = function(test, assert) {
               var row = rows[0];
               assert.strictEqual(rows.rowCount(), 1);
               assert.strictEqual(3, row.colCount());
-              
+
               assert.ok(new BigInteger('-1').equals(row.cols[0].name));
               assert.ok(new BigInteger('-11').equals(row.cols[0].value));
               assert.ok(new BigInteger('1').equals(row.cols[1].name));
               assert.ok(new BigInteger('11').equals(row.cols[1].value));
               assert.ok(new BigInteger('8776496549718567867543025521').equals(row.cols[2].name));
               assert.ok(new BigInteger('-8776496549718567867543025521').equals(row.cols[2].value));
-              
+
               assert.ok(new BigInteger('11').equals(row.colHash['1']));
               assert.ok(new BigInteger('-11').equals(row.colHash['-1']));
               assert.ok(new BigInteger('-8776496549718567867543025521').equals(row.colHash['8776496549718567867543025521']));
@@ -628,7 +628,7 @@ exports.testUUID = function(test, assert) {
         } else {
           con.execute('select ?, ? from CfUuid where key=?', selParms, function(selErr, rows) {
             con.close();
-            if (selErr) { 
+            if (selErr) {
               assert.ok(false);
             } else {
               assert.strictEqual(rows.rowCount(), 1);
@@ -639,7 +639,7 @@ exports.testUUID = function(test, assert) {
               assert.ok(UUID.fromString('6fd45160-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[0].value));
               assert.ok(UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff').equals(row.cols[1].name));
               assert.ok(UUID.fromString('6fd6e970-65e0-11e0-0000-fe8ebeead9fe').equals(row.cols[1].value));
-             
+
               assert.ok(row.colHash[(UUID.fromString('6fd589e0-65e0-11e0-0000-7fd66bb03aff'))].equals(row.cols[1].value));
               assert.ok(row.colHash[(row.cols[0].name)].equals(row.cols[0].value));
               assert.ok(row.colHash[(UUID.fromString('6f8483b0-65e0-11e0-0000-fe8ebeead9fe'))].equals(row.cols[0].value));
@@ -675,7 +675,7 @@ exports.testCustomValidators = function(test, assert) {
               assert.strictEqual(rows.rowCount(), 1);
               var row = rows[0];
               assert.strictEqual(4, row.colCount());
-              
+
               assert.ok(row.colHash.normal.equals(new BigInteger('25')));
               assert.ok(row.colHash.int_col.equals(new BigInteger('21')));
               assert.ok(row.colHash.string_col.toString() === 'test_string_value');
@@ -692,9 +692,9 @@ exports.testCustomValidators = function(test, assert) {
 // this test only works an order-preserving partitioner.
 // it also uses an event-based approach to doing things.
 //exports.ZDISABLED_testMultipleRows = function(test, assert) {
-//  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are 
+//  // go through the motions of creating a new keyspace every time. we do this to ensure only the things in there are
 //  // what I expect.
-//  
+//
 //  var sys = new Connection('127.0.0.1', CASSANDRA_PORT, 'system', null, null, {use_bigints: true});
 //  sys.connect(function(err) {
 //    if (err) {
@@ -710,7 +710,7 @@ exports.testCustomValidators = function(test, assert) {
 //        assert.ok(false);
 //        test.finish();
 //      });
-//    
+//
 //      // keyspace is there for sure. don't know about the cf.
 //      ev.on('ksready', function() {
 //        console.log('keyspace created');
@@ -726,10 +726,10 @@ exports.testCustomValidators = function(test, assert) {
 //        });
 //        con.close();
 //      });
-//      
+//
 //      // column family is ready, do the test.
 //      ev.on('cfready', function() {
-//        
+//
 //        // insert 100 rows.
 //        var con = new Connection('127.0.0.1', 19170, 'ints', null, null, {use_bigints: true});
 //        var count = 100;
@@ -741,7 +741,7 @@ exports.testCustomValidators = function(test, assert) {
 //              ev.emit('syserr');
 //            } else {
 //              num += 1;
-//              
+//
 //              // after all the rows are in, do a query.
 //              if (num >= count) {
 //                con.execute('select ? from cfints where key > ? and key < ?', [1, 10, 20], function(serr, rows) {
@@ -753,7 +753,7 @@ exports.testCustomValidators = function(test, assert) {
 //          });
 //        }
 //      });
-//      
+//
 //      // start everything off.
 //      sys.execute('drop keyspace ints', null, function(dropErr) {
 //        if (!dropErr) {
@@ -832,7 +832,7 @@ exports.testPooledConnection = function(test, assert) {
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
   var hosts = ["127.0.0.1:19170"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
-  
+
   var range = new Array(100).join(' ').split(' ');
 
   // Hammer time...
