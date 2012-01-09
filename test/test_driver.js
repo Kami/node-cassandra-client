@@ -183,6 +183,46 @@ exports.testNoResults = function(test, assert) {
   });
 };
 
+exports.testSelectCount = function(test, assert) {
+  var con = null;
+
+  async.waterfall([
+    connect,
+
+    function executeCountQuery(_con, callback) {
+      con = _con;
+      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
+        assert.ifError(err);
+        assert.equal(rows[0].cols[0].value, 0);
+        callback();
+      });
+    },
+
+    function insertFiveRows(callback) {
+      async.forEach([1, 2, 3, 4, 5], function(i, callback) {
+        con.execute('UPDATE CfLong SET 1=1 WHERE key=?', [i], callback);
+      }, callback);
+    },
+
+    function executeCountQuery(callback) {
+      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
+        assert.ifError(err);
+        assert.equal(rows[0].cols[0].value, 5);
+        callback();
+      });
+    },
+  ],
+
+  function(err) {
+    if (con) {
+      con.close();
+    }
+
+    assert.ifError(err);
+    test.finish();
+  });
+};
+
 exports.testSimpleUpdate = function(test, assert) {
   connect(function(err, con) {
     if (err) {
