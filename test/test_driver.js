@@ -33,6 +33,7 @@ var Keyspace = require('../node-cassandra-client').Keyspace;
 var System = require('../lib/system').System;
 var KsDef = require('../lib/system').KsDef;
 var CfDef = require('../lib/system').CfDef;
+var UUID = require('../lib/driver').UUID;
 
 var CASSANDRA_PORT = 19170;
 
