@@ -165,6 +165,7 @@ exports.testWhiskyIsWorking = function(test, assert) {
 exports.testNoResults = function(test, assert) {
   connect(function(err, con) {
     if (err) {
+      con.close();
       assert.ifError(err);
       test.finish();
     } else {
