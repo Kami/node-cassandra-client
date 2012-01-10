@@ -1,3 +1,5 @@
+- Add more cassandra types to the decoder [Christoph Tavan]
+
 Changes with cassandra-client 0.6.2:
 
 - Fix scope leaks.
