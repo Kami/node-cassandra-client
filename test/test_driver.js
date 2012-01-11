@@ -207,7 +207,8 @@ exports.testSelectCount = function(test, assert) {
     function executeCountQuery(callback) {
       con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
         assert.ifError(err);
-        assert.equal(rows[0].cols[0].value, 5);
+        console.log(rows[0].cols);
+        assert.strictEqual(rows[0].cols[0].value, 5);
         callback();
       });
     },
