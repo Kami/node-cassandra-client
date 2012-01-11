@@ -19,6 +19,7 @@
 var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToBigLong = require('../lib/decoder').bytesToBigLong;
 var bytesToNum = require('../lib/decoder').bytesToNum;
+var bufferToString = require('../lib/decoder').bufferToString;
 var UUID = require('../lib/uuid');
 
 function makeBuffer(string) {
@@ -240,5 +241,17 @@ exports.testUUID = function(test, assert) {
   for (var i = 0; i < strings.length; i++) {
     assert.deepEqual( UUID.fromString(strings[i]), UUID.fromBytes(arrays[i]) );
   }
+  test.finish();
+};
+
+exports.testHexing = function(test, assert) {
+  var buf = new Buffer(6);
+  buf[0] = 0x00;
+  buf[1] = 0x33;
+  buf[2] = 0x66;
+  buf[3] = 0x99;
+  buf[4] = 0xcc;
+  buf[5] = 0xff;
+  assert.strictEqual('00336699ccff', bufferToString(buf));
   test.finish();
 };

@@ -34,6 +34,8 @@ var System = require('../lib/system').System;
 var KsDef = require('../lib/system').KsDef;
 var CfDef = require('../lib/system').CfDef;
 var UUID = require('../lib/driver').UUID;
+var util = require('./util');
+var decoder = require('../lib/decoder');
 
 var CASSANDRA_PORT = 19170;
 
@@ -427,6 +429,33 @@ exports.testIntNoBigint = function(test, assert) {
       });
     }
   });
+};
+
+exports.testBinary = function(test, assert) {
+  connect(function(err, con) {
+    assert.ifError(err);
+    var key = 'binarytest';
+    var binaryParams = [util.randomBuffer(), util.randomBuffer(), util.randomBuffer()];
+    var stringParams = binaryParams.map(decoder.bufferToString);
+    con.execute('update CfBytes set ?=? where key=?', stringParams, function(updErr) {
+      if (updErr) {
+        con.close();
+        assert.ok(false);
+        test.finish();
+      } else {
+        con.execute('select ? from CfBytes where key=?', [stringParams[0], stringParams[2]], function(selErr, rows) {
+          con.close();
+          assert.strictEqual(rows.rowCount(), 1);
+          var row = rows[0];
+          console.log(row);
+          assert.strictEqual(row.key.toString('base64'), binaryParams[2].toString('base64'));
+          assert.strictEqual(row.cols[0].name.toString('base64'), binaryParams[0].toString('base64'));
+          assert.strictEqual(row.cols[0].value.toString('base64'), binaryParams[1].toString('base64'));
+          test.finish();
+        });
+      }
+    });
+  });  
 };
 
 exports.testLong = function(test, assert) {
