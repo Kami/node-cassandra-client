@@ -27,7 +27,7 @@ var async = require('async');
 var BigInteger = require('../lib/bigint').BigInteger;
 
 var Connection = require('../lib/driver').Connection;
-var PooledConnection = require('../lib/driver').PooledConnection2;
+var PooledConnection = require('../lib/driver').PooledConnection;
 var ConnectionInPool = require('../lib/driver').ConnectionInPool;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
