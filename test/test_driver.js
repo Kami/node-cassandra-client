@@ -28,6 +28,7 @@ var BigInteger = require('../lib/bigint').BigInteger;
 
 var Connection = require('../lib/driver').Connection;
 var PooledConnection = require('../lib/driver').PooledConnection;
+var ConnectionInPool = require('../lib/driver').ConnectionInPool;
 var ttypes = require('../lib/gen-nodejs/cassandra_types');
 var Keyspace = require('../node-cassandra-client').Keyspace;
 var System = require('../lib/system').System;
@@ -278,8 +279,8 @@ exports.testPooledConnectionKeyspaceDoesNotExistConnect = function(test, assert)
                                   use_bigints: false});
   con.execute('SELECT * FROM foo', [], function(err) {
     assert.ok(err);
-    assert.equal(err.name, 'NotFoundException')
     assert.equal(err.message, 'ColumnFamily or Keyspace does not exist');
+    assert.equal(err.name, 'NotFoundException')
     test.finish();
   });
 };
@@ -847,7 +848,7 @@ exports.testCustomValidators = function(test, assert) {
 
 
 exports.testPooledConnectionFailover = function(test, assert) {
-  var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.2', '127.0.0.1:19170'];
+  var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.1:19170', '127.0.0.2'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
 
   async.series([
@@ -989,4 +990,19 @@ exports.testTimeLogging = function(test, assert) {
 };
 
 
-
+exports.testConnectionInPool = function(test, assert) {
+  var con = new ConnectionInPool({
+    host: '127.0.0.1',
+    port: 19170,
+    keyspace: 'Keyspace1',
+    use_bigints: true
+  });
+  con.connect(function(err) {
+    if (err) {
+      assert.ifError(err);
+    } else {
+      con.close();
+      test.finish();
+    }
+  });
+};
