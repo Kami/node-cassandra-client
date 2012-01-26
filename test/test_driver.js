@@ -215,7 +215,6 @@ exports.testSelectCount = function(test, assert) {
     function executeCountQuery(callback) {
       con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
         assert.ifError(err);
-        console.log(rows[0].cols);
         assert.strictEqual(rows[0].cols[0].value, 5);
         callback();
       });
@@ -453,7 +452,6 @@ exports.testBinary = function(test, assert) {
           con.close();
           assert.strictEqual(rows.rowCount(), 1);
           var row = rows[0];
-          console.log(row);
           assert.strictEqual(row.key.toString('base64'), binaryParams[2].toString('base64'));
           assert.strictEqual(row.cols[0].name.toString('base64'), binaryParams[0].toString('base64'));
           assert.strictEqual(row.cols[0].value.toString('base64'), binaryParams[1].toString('base64'));
