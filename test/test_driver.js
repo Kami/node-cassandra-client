@@ -1008,3 +1008,46 @@ exports.testConnectionInPool = function(test, assert) {
     }
   });
 };
+
+
+exports.testPooledConnectionLoad = function(test, assert) {
+  var hosts = ['127.0.0.1:19170'];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+
+  var count = 3000;
+
+  async.waterfall([
+    function(cb) {
+      conn.execute('TRUNCATE CfUtf8', [], cb);
+    },
+    function(res, cb) {
+      var executes = [];
+      for (var i = 0; i < count; i++) {
+        executes.push(function(parallelCb) {
+          var uuid = new UUID().toString();
+          conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', [
+            'testCol',
+            'testVal',
+            uuid
+          ], parallelCb);
+        });
+      }
+      async.parallel(executes, function(err) {
+        assert.ifError(err);
+        cb();
+      });
+    },
+    function(cb) {
+      conn.execute('SELECT COUNT(*) FROM CfUtf8', [], cb);
+    },
+    function(res, cb) {
+      assert.equal(res[0].colHash.count, count);
+      cb();
+    },
+    conn.shutdown.bind(conn)
+  ],
+  function(err) {
+    assert.ifError(err);
+    test.finish();
+  });
+};
