@@ -1023,14 +1023,15 @@ exports.testPooledConnectionLoad = function(test, assert) {
     function(res, cb) {
       var executes = [];
       for (var i = 0; i < count; i++) {
-        executes.push(function(parallelCb) {
-          var uuid = new UUID().toString();
-          conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', [
-            'testCol',
-            'testVal',
-            uuid
-          ], parallelCb);
-        });
+        (function(index) {
+          executes.push(function(parallelCb) {
+            conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', [
+              'testCol',
+              'testVal',
+              'testKey'+index
+            ], parallelCb);
+          });
+        })(i);
       }
       async.parallel(executes, function(err) {
         assert.ifError(err);
@@ -1044,10 +1045,41 @@ exports.testPooledConnectionLoad = function(test, assert) {
       assert.equal(res[0].colHash.count, count);
       cb();
     },
-    conn.shutdown.bind(conn)
+    function(cb) {
+      conn.execute('TRUNCATE CfUtf8', [], cb);
+    },
+    function(res, cb) {
+      conn.shutdown(cb);
+    }
   ],
   function(err) {
     assert.ifError(err);
+    test.finish();
+  });
+};
+
+
+// We want to test if all executes of a pooled connection are finished before
+// the shutdown callback is called.
+exports.testPooledConnectionShutdown = function(test, assert) {
+  var hosts = ['127.0.0.1:19170'];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+
+  var expected = 100;
+  var cbcount = 0;
+  var spy = function(err, res) {
+    assert.ifError(err);
+    cbcount++;
+  };
+
+  for (var i = 0; i < expected; i++) {
+    (function(index) {
+      conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
+    })(i);
+  }
+  conn.shutdown(function(err) {
+    assert.ifError(err);
+    assert.equal(cbcount, expected);
     test.finish();
   });
 };
