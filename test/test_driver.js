@@ -1083,3 +1083,37 @@ exports.testPooledConnectionShutdown = function(test, assert) {
     test.finish();
   });
 };
+
+exports.testPooledConnectionShutdownTwice = function(test, assert) {
+  var hosts = ['127.0.0.1:19170'];
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+
+  var expected = 100;
+  var cbcount = 0;
+  var spy = function(err, res) {
+    assert.ifError(err);
+    cbcount++;
+  };
+
+  for (var i = 0; i < expected; i++) {
+    (function(index) {
+      conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
+    })(i);
+  }
+
+  assert.ok(!conn.shuttingDown);
+  conn.shutdown(function(err) {
+    assert.ifError(err);
+    assert.equal(cbcount, expected);
+    assert.ok(secondCbCalledImmediatelyWithError);
+    test.finish();
+  });
+
+  // Make sure second callback gets called immediately with an error
+  var secondCbCalledImmediatelyWithError = false;
+  assert.ok(conn.shuttingDown);
+  conn.shutdown(function(err) {
+    assert.ok(err);
+    secondCbCalledImmediatelyWithError = true;
+  });
+};
