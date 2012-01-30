@@ -1,5 +1,7 @@
 Changes with cassandra-client X.Y.Z
 
+- Put drain back. (http://code.google.com/a/apache-extras.org/p/cassandra-node/issues/detail?id=32)
+
 - Allow blob updates (http://code.google.com/a/apache-extras.org/p/cassandra-node/issues/detail?id=28)
 
 - Remove logmagic dependency, see README.md for how to capture logging events.
