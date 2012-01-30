@@ -1010,11 +1010,13 @@ exports.testConnectionInPool = function(test, assert) {
 
 exports.testPooledConnectionLoad = function(test, assert) {
   var hosts = ['127.0.0.1:19170'];
-  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+  var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'timeout': 10000});
 
   var count = 3000;
 
   async.waterfall([
+    // establish connections prior to executing statements.
+    //conn.connect.bind(conn),
     function(cb) {
       conn.execute('TRUNCATE CfUtf8', [], cb);
     },
