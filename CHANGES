@@ -2,6 +2,9 @@ Changes with cassandra-client X.Y.Z
 
 - Allow blob updates (http://code.google.com/a/apache-extras.org/p/cassandra-node/issues/detail?id=28)
 
+- Remove logmagic dependency, see README.md for how to capture logging events.
+  (http://code.google.com/a/apache-extras.org/p/cassandra-node/issues/detail?id=16)
+
 Changes with cassandra-client 0.7.1
 
 - Swap out generic-pool with homegrown solution (issue 15).
