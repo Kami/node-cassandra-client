@@ -438,14 +438,13 @@ exports.testBinary = function(test, assert) {
     assert.ifError(err);
     var key = 'binarytest';
     var binaryParams = [util.randomBuffer(), util.randomBuffer(), util.randomBuffer()];
-    var stringParams = binaryParams.map(decoder.bufferToString);
-    con.execute('update CfBytes set ?=? where key=?', stringParams, function(updErr) {
+    con.execute('update CfBytes set ?=? where key=?', binaryParams, function(updErr) {
       if (updErr) {
         con.close();
         assert.ok(false);
         test.finish();
       } else {
-        con.execute('select ? from CfBytes where key=?', [stringParams[0], stringParams[2]], function(selErr, rows) {
+        con.execute('select ? from CfBytes where key=?', [binaryParams[0], binaryParams[2]], function(selErr, rows) {
           con.close();
           assert.strictEqual(rows.rowCount(), 1);
           var row = rows[0];
@@ -457,7 +456,7 @@ exports.testBinary = function(test, assert) {
         });
       }
     });
-  });  
+  });
 };
 
 exports.testLong = function(test, assert) {

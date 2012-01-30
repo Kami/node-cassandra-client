@@ -252,6 +252,6 @@ exports.testHexing = function(test, assert) {
   buf[3] = 0x99;
   buf[4] = 0xcc;
   buf[5] = 0xff;
-  assert.strictEqual('00336699ccff', bufferToString(buf));
+  assert.strictEqual('00336699ccff', buf.toString('hex'));
   test.finish();
 };
