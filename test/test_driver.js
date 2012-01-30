@@ -21,7 +21,6 @@ var console = require('console');
 var EventEmitter = require('events').EventEmitter;
 var http = require('http');
 
-var logmagic = require('logmagic');
 var async = require('async');
 
 var BigInteger = require('../lib/bigint').BigInteger;
@@ -86,6 +85,12 @@ function connect(options, callback) {
     callback(null, con);
   });
   var con = new Connection(connOptions);
+  con.on('log', function(level, message) {
+    if (['cql'].indexOf(level) !== -1) {
+      return;
+    }
+    console.log('log event: %s -- %j', level, message);
+  });
   con.connect(function(err) {
     if (err) {
       callback(err, null);
@@ -941,16 +946,16 @@ exports.testTimeLogging = function(test, assert) {
   var logObjsCql = [];
   var logObjsTime = [];
 
-  logmagic.registerSink('cql_sink', function(module, level, message, obj) {
-    logObjsCql.push(arguments);
-  });
-
-  logmagic.registerSink('timing_sink', function(module, level, message, obj) {
-    logObjsTime.push(arguments);
-  });
-
-  logmagic.route('node-cassandra-client.driver.cql', logmagic.TRACE1, 'cql_sink');
-  logmagic.route('node-cassandra-client.driver.timing', logmagic.TRACE1, 'timing_sink');
+  var appendLog = function(level, message) {
+    if (level === 'cql') {
+      logObjsCql.push(message);
+    }
+    if (level === 'timing') {
+      logObjsTime.push(message);
+    }
+  };
+  conn1.on('log', appendLog);
+  conn2.on('log', appendLog);
 
   conn1.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
     var logObj;
@@ -961,10 +966,10 @@ exports.testTimeLogging = function(test, assert) {
     assert.equal(logObjsTime.length, 0);
 
     logObj = logObjsCql[0];
-    assert.ok(logObj[3].hasOwnProperty('query'));
-    assert.ok(logObj[3].hasOwnProperty('parameterized_query'));
-    assert.ok(logObj[3].hasOwnProperty('args'));
-    assert.ok(!logObj[3].hasOwnProperty('time'));
+    assert.ok(logObj.hasOwnProperty('query'));
+    assert.ok(logObj.hasOwnProperty('parameterized_query'));
+    assert.ok(logObj.hasOwnProperty('args'));
+    assert.ok(!logObj.hasOwnProperty('time'));
 
     conn2.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows) {
       var logObj;
@@ -976,14 +981,12 @@ exports.testTimeLogging = function(test, assert) {
       assert.equal(logObjsTime.length, 1);
       logObj = logObjsTime[0];
 
-      assert.ok(logObj[3].hasOwnProperty('query'));
-      assert.ok(logObj[3].hasOwnProperty('parameterized_query'));
-      assert.ok(logObj[3].hasOwnProperty('args'));
-      assert.ok(logObj[3].hasOwnProperty('time'));
+      assert.ok(logObj.hasOwnProperty('query'));
+      assert.ok(logObj.hasOwnProperty('parameterized_query'));
+      assert.ok(logObj.hasOwnProperty('args'));
+      assert.ok(logObj.hasOwnProperty('time'));
 
-      conn1.shutdown();
-      conn2.shutdown();
-      test.finish();
+      conn1.shutdown(conn2.shutdown(test.finish));
     });
   });
 };
