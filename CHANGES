@@ -1,4 +1,8 @@
-Changes with cassandra-client X.Y.Z
+Changes with cassandra-client 0.8.1
+
+- fix callback problem with CP.shutdown
+
+Changes with cassandra-client 0.8.0
 
 - Put drain back. (http://code.google.com/a/apache-extras.org/p/cassandra-node/issues/detail?id=32)
 
