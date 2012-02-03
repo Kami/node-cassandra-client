@@ -1,3 +1,14 @@
+Changes with cassandra-client 0.8.2
+
+- id connections.
+- introduce options.max_query to allow separate and configurable query timeouts.
+- emit error event on thrift error.
+- long query watch logs a trace when any query takes more than 10s.
+- pooled connections need to quietly tear down transport connections when being reconnected.
+- fix recoverable error logic in PooledConnection.execute.
+- Make PooledConnection.execute() re-execution calls explicit (saw some strange inheritance problems when execute()
+  was overloaded with different parameters).
+
 Changes with cassandra-client 0.8.1
 
 - fix callback problem with CP.shutdown
