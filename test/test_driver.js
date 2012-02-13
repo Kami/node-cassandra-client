@@ -944,12 +944,12 @@ exports.testTimeLogging = function(test, assert) {
   var logObjsCql = [];
   var logObjsTime = [];
 
-  var appendLog = function(level, message) {
+  var appendLog = function(level, message, obj) {
     if (level === 'cql') {
-      logObjsCql.push(message);
+      logObjsCql.push([message, obj]);
     }
     if (level === 'timing') {
-      logObjsTime.push(message);
+      logObjsTime.push([message, obj]);
     }
   };
   conn1.on('log', appendLog);
@@ -963,7 +963,7 @@ exports.testTimeLogging = function(test, assert) {
     assert.equal(logObjsCql.length, 1);
     assert.equal(logObjsTime.length, 0);
 
-    logObj = logObjsCql[0];
+    logObj = logObjsCql[0][1];
     assert.ok(logObj.hasOwnProperty('query'));
     assert.ok(logObj.hasOwnProperty('parameterized_query'));
     assert.ok(logObj.hasOwnProperty('args'));
@@ -977,7 +977,7 @@ exports.testTimeLogging = function(test, assert) {
       // Timing log is enabled, logObjs should have 1 item
       assert.equal(logObjsCql.length, 2);
       assert.equal(logObjsTime.length, 1);
-      logObj = logObjsTime[0];
+      logObj = logObjsTime[0][1];
 
       assert.ok(logObj.hasOwnProperty('query'));
       assert.ok(logObj.hasOwnProperty('parameterized_query'));
