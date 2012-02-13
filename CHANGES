@@ -1,3 +1,14 @@
+Changes with cassandra-client 0.9.0
+
+- Change Connection and PooledConnection 'log' event arguments - now it takes the 
+  following arguments:
+
+  - level - log level
+  - message - string log message which is always present (previously this
+    argument could be either string or an object)
+  - obj - optional object which extra message attributes (e.g. connectionInfo,
+    query, etc.)
+
 Changes with cassandra-client 0.8.2
 
 - id connections.
