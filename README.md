@@ -135,11 +135,11 @@ Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and em
 
     var Connection = require('node-cassandra-client').Connection;
     var con = new Connection({host:'cassandra-host', port:9160, keyspace:'Keyspace1', user:'user', pass:'password'});
-    con.on('log', function(level, message) {
+    con.on('log', function(level, message, obj) {
       console.log('log event: %s -- %j', level, message);
     });
 
-The `level` being passed to the listener can be one of `debug`, `info`, `warn`, `error`, `timing` and `cql`. The `message` is usually a string, in the case of `timing` and `cql` it is an object that provides more detailed information.
+The `level` being passed to the listener can be one of `debug`, `info`, `warn`, `error`, `timing` and `cql`. The `message` is a string and `obj` is an object that provides more detailed information.
 
 
 Things you should know about
