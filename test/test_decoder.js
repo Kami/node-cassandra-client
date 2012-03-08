@@ -20,6 +20,7 @@ var BigInteger = require('../lib/bigint').BigInteger;
 var bytesToBigLong = require('../lib/decoder').bytesToBigLong;
 var bytesToNum = require('../lib/decoder').bytesToNum;
 var bufferToString = require('../lib/decoder').bufferToString;
+var Decoder = require('../lib/decoder').Decoder;
 var UUID = require('../lib/uuid');
 
 function makeBuffer(string) {
@@ -253,5 +254,17 @@ exports.testHexing = function(test, assert) {
   buf[4] = 0xcc;
   buf[5] = 0xff;
   assert.strictEqual('00336699ccff', buf.toString('hex'));
+  test.finish();
+};
+
+exports.testParamaterizedTypes = function (test, assert) {
+  var decoder = new Decoder({
+          key: 'org.apache.cassandra.db.marshal.UTF8Type',
+          comparator: 'org.apache.cassandra.db.marshal.ReversedType(org.apache.cassandra.db.marshal.UTF8Type)',
+          defaultValidator: 'org.apache.cassandra.db.marshal.UTF8Type'
+  });
+  var bytes = new Buffer([0x48, 0x65, 0x6c, 0x6c, 0x6f, 0x2c, 0x20, 0x57, 0x6f, 0x72, 0x6c, 0x64, 0x21]);
+  var str = decoder.decode(bytes, 'comparator');
+  assert.strictEqual(str, 'Hello, World!');
   test.finish();
 };
