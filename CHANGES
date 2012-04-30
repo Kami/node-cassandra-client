@@ -1,4 +1,4 @@
-Changes with cassandra-client in development:
+Changes with cassandra-client 0.9.1:
 
 - Emit a 'log' event with 'error' level if an error happens when connecting to
   Cassandra.
