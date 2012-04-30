@@ -1,3 +1,8 @@
+Changes with cassandra-client in development:
+
+- Emit a 'log' event with 'error' level if an error happens when connecting to
+  Cassandra.
+
 Changes with cassandra-client 0.9.0
 
 - Change PooledConnection to retry a query if a TimedOutException is returned.
