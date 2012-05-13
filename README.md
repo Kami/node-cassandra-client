@@ -6,6 +6,16 @@ node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache C
 CQL is a query language for Apache Cassandra.  You use it in much the same way you would use SQL for a relational database.
 The Cassandra [documentation](http://www.datastax.com/docs/1.0/references/cql/index) can help you learn the syntax.
 
+Installation
+====================
+
+    $ npm install cassandra-client
+    
+Build status
+====================
+
+[![Build Status](https://secure.travis-ci.org/racker/node-cassandra-client.png)](http://travis-ci.org/racker/node-cassandra-client)
+
 License
 ====================
 
@@ -14,10 +24,6 @@ node-cassandra-client is distributed under the [Apache license](http://www.apach
 [lib/bigint.js](https://github.com/racker/node-cassandra-client/blob/master/lib/bigint.js) is [borrowed](https://github.com/joyent/node/blob/master/deps/v8/benchmarks/crypto.js)
 from the Node.js source (which comes from the [V8](http://code.google.com/p/v8/) source).
 
-Installation
-====================
-
-    $ npm install cassandra-client
 
 Using It
 ====================
