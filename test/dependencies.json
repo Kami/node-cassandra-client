@@ -6,7 +6,7 @@
     "wait_for": "socket",
     "wait_for_options": {
       "host": "127.0.0.1",
-      "port": 19170
+      "port": 9160
     },
     "timeout": 10000
   }

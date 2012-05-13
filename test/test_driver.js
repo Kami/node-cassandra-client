@@ -37,7 +37,7 @@ var UUID = require('../lib/driver').UUID;
 var util = require('./util');
 var decoder = require('../lib/decoder');
 
-var CASSANDRA_PORT = 19170;
+var CASSANDRA_PORT = 9160;
 
 function merge(a, b) {
   var c = {}, attrname;
@@ -278,7 +278,7 @@ exports.testConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
 };
 
 exports.testPooledConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
-  var con = new PooledConnection({hosts: ['127.0.0.1:19170'],
+  var con = new PooledConnection({hosts: ['127.0.0.1:9160'],
                                   keyspace: 'doesNotExist.',
                                   use_bigints: false});
   con.execute('SELECT * FROM foo', [], function(err) {
@@ -808,7 +808,7 @@ exports.testCustomValidators = function(test, assert) {
 //      ev.on('cfready', function() {
 //
 //        // insert 100 rows.
-//        var con = new Connection('127.0.0.1', 19170, 'ints', null, null, {use_bigints: true});
+//        var con = new Connection('127.0.0.1', 9160, 'ints', null, null, {use_bigints: true});
 //        var count = 100;
 //        var num = 0;
 //        for (var i = 0; i < count; i++) {
@@ -850,7 +850,7 @@ exports.testCustomValidators = function(test, assert) {
 
 
 exports.testPooledConnectionFailover = function(test, assert) {
-  var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.1:19170', '127.0.0.2'];
+  var hosts = ['google.com:8000', '127.0.0.1:6567', '127.0.0.1:9160', '127.0.0.2'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
 
   async.series([
@@ -870,7 +870,7 @@ exports.testPooledConnectionFailover = function(test, assert) {
 
 exports.testLearnStepTimeout = function(test, assert) {
   var server = null;
-  var hosts = ['127.0.0.1:8688', '127.0.0.1:19170'];
+  var hosts = ['127.0.0.1:8688', '127.0.0.1:9160'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true, 'timeout': 5000});
 
   async.series([
@@ -907,7 +907,7 @@ exports.testPooledConnection = function(test, assert) {
   }
 
   //var hosts = ["127.0.0.2:9170", "127.0.0.1:9170"];
-  var hosts = ["127.0.0.1:19170"];
+  var hosts = ["127.0.0.1:9160"];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
 
   var range = new Array(100).join(' ').split(' ');
@@ -934,7 +934,7 @@ exports.testPooledConnection = function(test, assert) {
 };
 
 exports.testTimeLogging = function(test, assert) {
-  var hosts = ["127.0.0.1:19170"];
+  var hosts = ["127.0.0.1:9160"];
   var baseOptions = {'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true};
   var options1 = merge(baseOptions, {});
   var options2 = merge(baseOptions, {'log_time': true});
@@ -993,7 +993,7 @@ exports.testTimeLogging = function(test, assert) {
 exports.testConnectionInPool = function(test, assert) {
   var con = new ConnectionInPool({
     host: '127.0.0.1',
-    port: 19170,
+    port: 9160,
     keyspace: 'Keyspace1',
     use_bigints: true
   });
@@ -1009,7 +1009,7 @@ exports.testConnectionInPool = function(test, assert) {
 
 
 exports.testPooledConnectionLoad = function(test, assert) {
-  var hosts = ['127.0.0.1:19170'];
+  var hosts = ['127.0.0.1:9160'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'timeout': 10000});
 
   var count = 3000;
@@ -1062,7 +1062,7 @@ exports.testPooledConnectionLoad = function(test, assert) {
 // We want to test if all executes of a pooled connection are finished before
 // the shutdown callback is called.
 exports.testPooledConnectionShutdown = function(test, assert) {
-  var hosts = ['127.0.0.1:19170'];
+  var hosts = ['127.0.0.1:9160'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
 
   var expected = 100;
@@ -1085,7 +1085,7 @@ exports.testPooledConnectionShutdown = function(test, assert) {
 };
 
 exports.testPooledConnectionShutdownTwice = function(test, assert) {
-  var hosts = ['127.0.0.1:19170'];
+  var hosts = ['127.0.0.1:9160'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
 
   var expected = 100;

@@ -33,7 +33,7 @@ reduce_cache_sizes_at: 0.84999999999999998
 request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 rpc_address: 127.0.0.1
 rpc_keepalive: true
-rpc_port: 19170
+rpc_port: 9160
 rpc_timeout_in_ms: 10000
 saved_caches_directory: [/tmp/cass/savedcaches]
 seed_provider:
