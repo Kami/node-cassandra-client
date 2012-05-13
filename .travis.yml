@@ -1,0 +1,14 @@
+language: node_js
+
+node_js:
+  - 0.6
+
+before_install:
+  - sudo service cassandra start
+  - sleep 5
+
+script: npm run-script test
+
+notifications:
+  email:
+    - tomaz+travisci@tomaz.me
