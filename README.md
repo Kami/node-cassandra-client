@@ -29,7 +29,7 @@ Using It
 ====================
 
 ### Access the System keyspace
-    var System = require('node-cassandra-client').System;
+    var System = require('cassandra-client').System;
     var sys = new System('127.0.0.1:9160');
 
     sys.describeKeyspace('Keyspace1', function(err, ksDef) {
@@ -52,7 +52,7 @@ Using It
 ### Updating
 This example assumes you have strings for keys, column names and values:
 
-    var Connection = require('node-cassandra-client').Connection;
+    var Connection = require('cassandra-client').Connection;
     var con = new Connection({host:'cassandra-host', port:9160, keyspace:'Keyspace1', user:'user', pass:'password'});
     con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
         if (err) {
@@ -93,7 +93,7 @@ Assume the updates have happened previously.
 	
 ### Pooled Connections
     // Creating a new connection pool.
-    var PooledConnection = require('node-cassandra-client').PooledConnection;
+    var PooledConnection = require('cassandra-client').PooledConnection;
     var hosts = ['host1:9160', 'host2:9170', 'host3', 'host4'];
     var connection_pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
 
