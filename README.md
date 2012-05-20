@@ -72,7 +72,6 @@ The `Connection` constructor accepts the following properties:
     use_bigints: [optional] boolean. toggles whether or not BigInteger or Number instances are in results.
     timeout:     [optional] number. Connection timeout. Defaults to 4000ms.
     log_time:    [optional] boolean. Log execution time for all the queries.
-                 Timing is logged to 'node-cassandra-client.driver.timing' route. Defaults to false.
 
 ### Getting data
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
@@ -139,7 +138,7 @@ open connections after pending requests are complete.
 ### Logging
 Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and emit `log` events:
 
-    var Connection = require('node-cassandra-client').Connection;
+    var Connection = require('cassandra-client').Connection;
     var con = new Connection({host:'cassandra-host', port:9160, keyspace:'Keyspace1', user:'user', pass:'password'});
     con.on('log', function(level, message, obj) {
       console.log('log event: %s -- %j', level, message);
