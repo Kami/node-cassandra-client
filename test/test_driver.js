@@ -881,8 +881,8 @@ exports.testLearnStepTimeout = function(test, assert) {
       server.listen(8688, '127.0.0.1', callback);
     },
 
-      function executeQueryPooledConnection(callback) {
-        conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+    function executeQueryPooledConnection(callback) {
+      conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
         assert.ifError(err);
         callback();
       });
@@ -1083,6 +1083,7 @@ exports.testPooledConnectionShutdown = function(test, assert) {
     test.finish();
   });
 };
+
 
 exports.testPooledConnectionShutdownTwice = function(test, assert) {
   var hosts = ['127.0.0.1:9160'];
