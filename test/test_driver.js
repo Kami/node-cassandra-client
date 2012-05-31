@@ -881,8 +881,8 @@ exports.testLearnStepTimeout = function(test, assert) {
       server.listen(8688, '127.0.0.1', callback);
     },
 
-      function executeQueryPooledConnection(callback) {
-        conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
+    function executeQueryPooledConnection(callback) {
+      conn.execute('UPDATE CfUgly SET A=1 WHERE KEY=1', [], function(err) {
         assert.ifError(err);
         callback();
       });
@@ -1084,6 +1084,7 @@ exports.testPooledConnectionShutdown = function(test, assert) {
   });
 };
 
+
 exports.testPooledConnectionShutdownTwice = function(test, assert) {
   var hosts = ['127.0.0.1:9160'];
   var conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
@@ -1115,5 +1116,17 @@ exports.testPooledConnectionShutdownTwice = function(test, assert) {
   conn.shutdown(function(err) {
     assert.ok(err);
     secondCbCalledImmediatelyWithError = true;
+  });
+};
+
+
+exports.testPooledContainerImmediateShutdown = function(test, assert) {
+  var hosts = ['127.0.0.1:9160'];
+  var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
+
+  pool.connect();
+  pool.shutdown(function(err) {
+    assert.ifError(err);
+    test.finish();
   });
 };
