@@ -117,6 +117,8 @@ exports.setUp = function(test, assert) {
       var cfInt = new CfDef({keyspace: ksName, name: 'CfInt', column_type: 'Standard', comparator_type: 'IntegerType', default_validation_class: 'IntegerType', key_validation_class: 'IntegerType'});
       var cfUtf8 = new CfDef({keyspace: ksName, name: 'CfUtf8', column_type: 'Standard', comparator_type: 'UTF8Type', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
       var cfBytes = new CfDef({keyspace: ksName, name: 'CfBytes', column_type: 'Standard', comparator_type: 'BytesType', default_validation_class: 'BytesType', key_validation_class: 'BytesType'});
+      var cfBoolean = new CfDef({keyspace: ksName, name: 'CfBoolean', column_type: 'Standard', comparator_type: 'BooleanType', default_validation_class: 'BooleanType', key_validation_class: 'BooleanType'});
+      var cfDate = new CfDef({keyspace: ksName, name: 'CfDate', column_type: 'Standard', comparator_type: 'DateType', default_validation_class: 'DateType', key_validation_class: 'DateType'});
       var cfUuid = new CfDef({keyspace: ksName, name: 'CfUuid', column_type: 'Standard', comparator_type: 'TimeUUIDType', default_validation_class: 'TimeUUIDType', key_validation_class: 'TimeUUIDType'});
       var cfUgly = new CfDef({keyspace: ksName, name: 'CfUgly', column_type: 'Standard', comparator_type: 'UTF8Type',
                               default_validation_class: 'LongType', key_validation_class: 'IntegerType',
@@ -127,7 +129,7 @@ exports.setUp = function(test, assert) {
                               ]});
       var cfCounter = new CfDef({keyspace: ksName, name: 'CfCounter', column_type: 'Standard', comparator_type: 'AsciiType', default_validation_class: 'CounterColumnType', key_validation_class: 'AsciiType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfUuid, cfUgly, cfCounter]});
+      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfBoolean, cfDate, cfUuid, cfUgly, cfCounter]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
         close();
@@ -382,20 +384,20 @@ exports.testLongNoBigint = function(test, assert) {
       con.connectionInfo.use_bigints = false;
       assert.strictEqual(con.connectionInfo.use_bigints, false);
 
-      var updParms = [1,2,99];
+      var updParms = [1,-2,9999999999];
       con.execute('update CfLong set ?=? where key=?', updParms, function(updErr) {
         if (updErr) {
           con.close();
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ? from CfLong where key=?', [1, 99], function(selErr, rows) {
+          con.execute('select ? from CfLong where key=?', [1, 9999999999], function(selErr, rows) {
             con.close();
             assert.strictEqual(rows.rowCount(), 1);
             var row = rows[0];
             assert.strictEqual(1, row.colCount());
             assert.strictEqual(1, row.cols[0].name);
-            assert.strictEqual(2, row.cols[0].value);
+            assert.strictEqual(-2, row.cols[0].value);
             test.finish();
           });
         }
@@ -455,6 +457,57 @@ exports.testBinary = function(test, assert) {
           assert.strictEqual(row.key.toString('base64'), binaryParams[2].toString('base64'));
           assert.strictEqual(row.cols[0].name.toString('base64'), binaryParams[0].toString('base64'));
           assert.strictEqual(row.cols[0].value.toString('base64'), binaryParams[1].toString('base64'));
+          test.finish();
+        });
+      }
+    });
+  });
+};
+
+exports.testBoolean = function(test, assert) {
+  connect(function(err, con) {
+    assert.ifError(err);
+    var key = 'binarytest';
+    var booleanParams = [true, false, true]
+    con.execute('update CfBoolean set ?=? where key=?', booleanParams, function(updErr) {
+      if (updErr) {
+        con.close();
+        assert.ok(false);
+        test.finish();
+      } else {
+          con.execute('select ? from CfBoolean where key=?', [true, true], function(selErr, rows) {
+          con.close();
+          assert.strictEqual(rows.rowCount(), 1);
+          var row = rows[0];
+          assert.strictEqual(row.key, true);
+          assert.strictEqual(row.cols[0].name, true);
+          assert.strictEqual(row.cols[0].value, false);
+          test.finish();
+        });
+      }
+    });
+  });
+};
+
+exports.testDate = function(test, assert) {
+  connect(function(err, con) {
+    assert.ifError(err);
+    var key = 'binarytest';
+      var now = new Date();
+      var dateParams = [now, now.getTime(), new Date(2021, 11, 11, 11, 11, 11, 111) ]
+    con.execute('update CfDate set ?=? where key=?', dateParams, function(updErr) {
+      if (updErr) {
+        con.close();
+        assert.ok(false);
+        test.finish();
+      } else {
+          con.execute('select ? from CfDate where key=?', [now, dateParams[2]], function(selErr, rows) {
+          con.close();
+          assert.strictEqual(rows.rowCount(), 1);
+          var row = rows[0];
+          assert.strictEqual(row.key.getTime(), dateParams[2].getTime());
+          assert.strictEqual(row.cols[0].name.getTime(), now.getTime());
+          assert.strictEqual(row.cols[0].value.getTime(), now.getTime());
           test.finish();
         });
       }

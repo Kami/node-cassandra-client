@@ -56,10 +56,15 @@ exports.testNumConversion = function(test, assert) {
   assert.strictEqual('2550' ,bytesToNum(makeBuffer('\u0000\u0000\u0000\u0000\u0000\u0000\tö')).toString()); // 2550
   assert.strictEqual('8025521', bytesToNum(makeBuffer('\u0000\u0000\u0000\u0000\u0000zu±')).toString()); // 8025521
   assert.strictEqual('218025521', bytesToNum(makeBuffer('\u0000\u0000\u0000\u0000\fþÎ1')).toString()); // 218025521
-  
-  // these values ensure that none 8 byte sequences work as well.
+  assert.strictEqual('1330225392929', bytesToNum(makeBuffer('\u0000\u0000\u0001\u0035\u00b7\u009c\u00ad\u0021')).toString()); // Sun, 26 Feb 2012 03:03:05 GMT
+  assert.strictEqual(-1, bytesToNum(makeBuffer('\u00ff\u00ff\u00ff\u00ff\u00ff\u00ff\u00ff\u00ff'))); // -1
+
+  // these values ensure that non 8 byte sequences work as well.
+
   assert.strictEqual(2147483647, bytesToNum(makeBuffer('\u007f\u00ff\u00ff\u00ff'))); // [127,-1,-1,-1]
   assert.strictEqual(-2147483648, bytesToNum(makeBuffer('\u0080\u0000\u0000\u0000'))); // [-128,0,0,0]
+  assert.strictEqual(-256, bytesToNum(makeBuffer('\u00ff\u00ff\u00ff\u0000'))); // [-1,-1,-1,0]
+  assert.strictEqual(256, bytesToNum(makeBuffer('\u0000\u0000\u0001\u0000'))); // [0,0,1,0]
   assert.strictEqual(-1, bytesToNum(makeBuffer('\u00ff'))); // [-1]
   assert.strictEqual(1, bytesToNum(makeBuffer('\u0001'))); // [1]
   
