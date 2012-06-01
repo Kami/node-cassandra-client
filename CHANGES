@@ -1,4 +1,4 @@
-Changes with cassandra-client in deveploment:
+Changes with cassandra-client in 0.9.3:
 
 - Improve serialization and deserialization support for the following types: Number, Date, Boolean.
   [Dan Foody]
