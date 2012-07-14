@@ -1,7 +1,7 @@
 if [ $TRAVIS ]; then
   dependencies=""
 else
-  dependencies="tests/dependencies.json"
+  dependencies="--dependencies test/dependencies.json"
 fi
 
 if [ ! $TEST_FILES ]; then
