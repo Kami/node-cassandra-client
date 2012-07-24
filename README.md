@@ -38,7 +38,7 @@ Using It
       } else {
         // assume ksDef contains a full description of the keyspace (uses the thrift structure).
       }
-    }
+    });
     
 ### Create a keyspace
     sys.addKeyspace(ksDef, function(err) {
