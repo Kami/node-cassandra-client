@@ -129,7 +129,11 @@ exports.setUp = function(test, assert) {
                               ]});
       var cfCounter = new CfDef({keyspace: ksName, name: 'CfCounter', column_type: 'Standard', comparator_type: 'AsciiType', default_validation_class: 'CounterColumnType', key_validation_class: 'AsciiType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, strategy_class: 'org.apache.cassandra.locator.SimpleStrategy', strategy_options: {'replication_factor': '1'}, cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfBoolean, cfDate, cfUuid, cfUgly, cfCounter]});
+      var cfReversed = new CfDef({keyspace: ksName, name: 'CfReversed1', column_type: 'Standard', comparator_type: 'UTF8Type(reversed=true)', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
+      var keyspace1 = new KsDef({name: ksName, 
+                                 strategy_class: 'org.apache.cassandra.locator.SimpleStrategy',
+                                 strategy_options: {'replication_factor': '1'}, 
+                                 cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfBoolean, cfDate, cfUuid, cfUgly, cfCounter, cfReversed]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
         close();
@@ -810,6 +814,40 @@ exports.testCustomValidators = function(test, assert) {
               assert.ok(row.colHash.int_col.equals(new BigInteger('21')));
               assert.ok(row.colHash.string_col.toString() === 'test_string_value');
               assert.ok(row.colHash.uuid_col.toString() == '6f8483b0-65e0-11e0-0000-fe8ebeead9fe');
+            }
+            test.finish();
+          });
+        }
+      });
+    }
+  });
+};
+
+exports.testReversedString = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      var updParms = ['a', 'foo', 'c', 'zoo', 'b', 'boo', 'rev_key_0'];
+      var selParms = ['rev_key_0'];
+      con.execute('update CfReversed1 set ?=?, ?=?, ?=? where key=?', updParms, function (updErr) {
+        if (updErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select * from CfReversed1 where key=?', selParms, function(selErr, rows) {
+            con.close();
+            if (selErr) {
+              assert.ok(false);
+            } else {
+              // verify sort is reversed.
+              assert.strictEqual(rows.length, 1);
+              var cols = rows[0].cols;
+              assert.strictEqual(cols[0].name, 'c');
+              assert.strictEqual(cols[1].name, 'b');
+              assert.strictEqual(cols[2].name, 'a');
             }
             test.finish();
           });
