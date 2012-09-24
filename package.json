@@ -5,7 +5,8 @@
     "Gary Dusbabek <gdusbabek@gmail.com>",
     "Tomaž Muraus <tomaz@tomaz.me>",
     "Patrick Negri <patrick@iugu.com.br>",
-    "Christoph Tavan <dev@tavan.de>"
+    "Christoph Tavan <dev@tavan.de>",
+    "Allan Carroll <allanca@gmail.com>"
   ],
   "name": "cassandra-client",
   "description": "Node.js CQL driver for Apache Cassandra",
