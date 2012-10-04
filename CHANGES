@@ -1,6 +1,8 @@
-DEV
+Changes with cassandra-client in 0.9.4
 
 - support for parmeterized types (patch contributed by Allan Carroll <allanca@gmail.com>)
+- log strings instead of buffers.
+- Fix potential double callback on connect. [Allan Carroll]
 
 Changes with cassandra-client in 0.9.3:
 
