@@ -1,3 +1,7 @@
+Changes with cassandra-client in 0.9.5
+
+- fix exception thrown with undefinded query parameters [Simon Gaeremynck]
+
 Changes with cassandra-client in 0.9.4
 
 - support for parmeterized types (patch contributed by Allan Carroll <allanca@gmail.com>)
