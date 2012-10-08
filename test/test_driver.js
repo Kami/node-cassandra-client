@@ -866,7 +866,8 @@ exports.testUndefinedParam = function(test, assert) {
     } else {
       con.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [undefined, 'aaa', 'missing_col_0'], function(err) {
         con.close();
-        assert.ok(err instanceof TypeError);
+        assert.ok(err);
+        assert.strictEqual('null/undefined query parameter', err.message);
         test.finish();
       });
     }
