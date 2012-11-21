@@ -205,8 +205,9 @@ exports.testSelectCount = function(test, assert) {
 
     function executeCountQuery(_con, callback) {
       con = _con;
-      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
+      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows, metadata) {
         assert.ifError(err);
+        assert.ok(metadata.connectionInfo);
         assert.equal(rows[0].cols[0].value, 0);
         callback();
       });
@@ -219,9 +220,9 @@ exports.testSelectCount = function(test, assert) {
     },
 
     function executeCountQuery(callback) {
-      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
+      con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows, metadata) {
         assert.ifError(err);
-        assert.ok(rows.metadata.connectionInfo);
+        assert.ok(metadata.connectionInfo);
         assert.strictEqual(rows[0].cols[0].value, 5);
         callback();
       });
@@ -1026,12 +1027,11 @@ exports.testPooledConnection = function(test, assert) {
     if (err) { bail(conn, err); }
 
     async.forEach(range, function (_, callback) {
-      conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows) {
+      conn.execute('SELECT A FROM CfUgly WHERE KEY=1', [], function(err, rows, metadata) {
         if (err) { bail(conn, err); }
         assert.strictEqual(rows.rowCount(), 1);
         var row = rows[0];
-        assert.ok(rows.hasOwnProperty('metadata'));
-        assert.ok(rows.metadata.connectionInfo)
+        assert.ok(metadata.connectionInfo)
         assert.strictEqual(row.cols[0].name.toString(), 'A');
         callback();
       });
@@ -1131,7 +1131,7 @@ exports.testPooledConnectionLoad = function(test, assert) {
     function(cb) {
       conn.execute('TRUNCATE CfUtf8', [], cb);
     },
-    function(res, cb) {
+    function(res, _, cb) {
       var executes = [];
       for (var i = 0; i < count; i++) {
         (function(index) {
@@ -1152,14 +1152,14 @@ exports.testPooledConnectionLoad = function(test, assert) {
     function(cb) {
       conn.execute('SELECT COUNT(*) FROM CfUtf8', [], cb);
     },
-    function(res, cb) {
+    function(res, metadata, cb) {
       assert.equal(res[0].colHash.count, count);
       cb();
     },
     function(cb) {
       conn.execute('TRUNCATE CfUtf8', [], cb);
     },
-    function(res, cb) {
+    function(res, _, cb) {
       conn.shutdown(cb);
     }
   ],
