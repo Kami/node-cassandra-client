@@ -1,3 +1,9 @@
+Changes with cassandra-client in 0.9.6
+
+- Add metadata.connectionInfo attribute to the 'rows' object passed to the
+  {Connection,PooledConnection}.execute callback. This object contains host and
+  port of the Cassandra host where the query was actually executed.
+
 Changes with cassandra-client in 0.9.5
 
 - fix exception thrown with undefinded query parameters [Simon Gaeremynck]

@@ -221,6 +221,7 @@ exports.testSelectCount = function(test, assert) {
     function executeCountQuery(callback) {
       con.execute('SELECT COUNT(*) FROM CfLong', [], function(err, rows) {
         assert.ifError(err);
+        assert.ok(rows.metadata.connectionInfo);
         assert.strictEqual(rows[0].cols[0].value, 5);
         callback();
       });
@@ -1029,6 +1030,8 @@ exports.testPooledConnection = function(test, assert) {
         if (err) { bail(conn, err); }
         assert.strictEqual(rows.rowCount(), 1);
         var row = rows[0];
+        assert.ok(rows.hasOwnProperty('metadata'));
+        assert.ok(rows.metadata.connectionInfo)
         assert.strictEqual(row.cols[0].name.toString(), 'A');
         callback();
       });
