@@ -1,3 +1,12 @@
+Changes with cassandra-client in 0.10.0
+
+- Pass 'metadata' object as a third and last argument to the
+  {Connection,PooledConnection}.execute callback.
+
+  Note: This change might break some of the existing code (e.g. if you use
+  connection.execute directly in async.waterfall chain) because previously
+  execute callback took two arguments and now it takes three.
+
 Changes with cassandra-client in 0.9.6
 
 - Add metadata.connectionInfo attribute to the 'rows' object passed to the
