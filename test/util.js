@@ -10,9 +10,9 @@ function randomInt(min, max) {
   return Math.round(Math.random() * (max - min) + min);
 }
 
-function randomBuffer(sz) {
+function randomBuffer(sz, type) {
   sz = sz || randomInt(10, 100);
-  var buf = new Buffer(sz);
+  var buf = new Buffer(sz, type || 'binary');
   for (var i = 0; i < sz; i++) {
     buf[i] = randomInt(0, 255);
   }
