@@ -1,3 +1,12 @@
+Changes with cassandra-client in 0.11.0
+
+- Changes to support cassandra 1.1. 
+
+  Mainly changes related to using binary strings instead of Buffer objects.
+  Regenerated Thrift client.
+  Still compatible with Cassandra 1.0.x.
+  No CQ3 yet.
+
 Changes with cassandra-client in 0.10.0
 
 - Pass 'metadata' object as a third and last argument to the
