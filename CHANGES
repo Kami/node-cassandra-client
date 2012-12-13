@@ -5,6 +5,13 @@ Changes with cassandra-client in development
   Thrift client supports request multiplexing which means marking connection as
   'taken' when a query is executing is not necessary.
 
+- Rename 'max_query' Connection / PooledConnection option to 'query_timeout'.
+  Also decrease default 'query_timeout' from 100 seconds to a more sane value of
+  5 seconds.
+
+- Properly propagate 'query_timeout' setting to a ConnectionInPool class inside
+  a PooledConnection class.
+
 Changes with cassandra-client in 0.11.0
 
 - Changes to support cassandra 1.1.
