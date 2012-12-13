@@ -1,4 +1,4 @@
-Changes with cassandra-client in development
+Changes with cassandra-client in 0.12.0
 
 - Remove concept of a 'taken' connection and allow the same Thrift connection to
   be used to execute multiple queries at the same time.
