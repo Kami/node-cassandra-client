@@ -1176,22 +1176,16 @@ exports.testPooledConnectionLoad = function(test, assert) {
       conn.execute('TRUNCATE CfUtf8', [], cb);
     },
     function(res, _, cb) {
-      var executes = [];
-      for (var i = 0; i < count; i++) {
-        (function(index) {
-          executes.push(function(parallelCb) {
-            conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', [
-              'testCol',
-              'testVal',
-              'testKey'+index
-            ], parallelCb);
-          });
-        })(i);
-      }
-      async.parallel(executes, function(err) {
-        assert.ifError(err);
-        cb();
-      });
+      var arr = util.makeRangeArray(count);
+      async.forEach(arr, function(index, callback) {
+        var args = [
+          'testCol',
+          'testVal',
+          'testKey' + index
+        ];
+
+        conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', args, callback);
+      }, cb);
     },
     function(cb) {
       conn.execute('SELECT COUNT(*) FROM CfUtf8', [], cb);
@@ -1222,16 +1216,17 @@ exports.testPooledConnectionShutdown = function(test, assert) {
 
   var expected = 100;
   var cbcount = 0;
+  var arr = util.makeRangeArray(expected);
   var spy = function(err, res) {
     assert.ifError(err);
     cbcount++;
   };
 
-  for (var i = 0; i < expected; i++) {
-    (function(index) {
-      conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
-    })(i);
-  }
+  async.forEach(arr, function(index, callback) {
+    conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
+    callback();
+  }, function() {});
+
   conn.shutdown(function(err) {
     assert.ifError(err);
     assert.equal(cbcount, expected);
@@ -1246,16 +1241,16 @@ exports.testPooledConnectionShutdownTwice = function(test, assert) {
 
   var expected = 100;
   var cbcount = 0;
+  var arr = util.makeRangeArray(expected);
   var spy = function(err, res) {
     assert.ifError(err);
     cbcount++;
   };
 
-  for (var i = 0; i < expected; i++) {
-    (function(index) {
-      conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
-    })(i);
-  }
+  async.forEach(arr, function(index, callback) {
+    conn.execute('UPDATE CfUtf8 SET ? = ? WHERE KEY = ?', ['col', 'val', 'key'+index], spy);
+    callback();
+  }, function() {});
 
   assert.ok(!conn.shuttingDown);
   conn.shutdown(function(err) {

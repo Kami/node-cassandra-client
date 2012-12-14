@@ -26,8 +26,8 @@ exports.test_uuid_from_time_v1 = function(test, assert) {
 };
 
 exports.test_uuid_from_buffer = function(test, assert) {
-  var buf = new Buffer('\u00ee\u00a1\u006c\u00c0\u00cf\u00bd\u0011\u00e0\u0017' +
-          '\u000a\u00dd\u0026\u0075\u0027\u009e\u0008', 'binary');
+  var buf = new Buffer('\u00ee\u00a1l\u00c0\u00cf\u00bd\u0011\u00e0\u0017' +
+          '\u000a\u00dd&u\u0027\u009e\u0008', 'binary');
   var uuid = UUID.fromBytes(buf);
   assert.strictEqual(uuid.toString(), 'eea16cc0-cfbd-11e0-170a-dd2675279e08');
   test.finish();

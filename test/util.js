@@ -19,5 +19,16 @@ function randomBuffer(sz, type) {
   return buf;
 }
 
+function makeRangeArray(len) {
+  var i, result = [];
+
+  for (i = 0; i < len; i++) {
+    result.push(i);
+  }
+
+  return result;
+}
+
 exports.randomInt = randomInt;
 exports.randomBuffer = randomBuffer;
+exports.makeRangeArray = makeRangeArray;
