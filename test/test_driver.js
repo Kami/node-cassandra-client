@@ -53,7 +53,7 @@ function merge(a, b) {
     }
   }
   return c;
-};
+}
 
 function stringToHex(s) {
   var buf = '';
@@ -226,7 +226,7 @@ exports.testSelectCount = function(test, assert) {
         assert.strictEqual(rows[0].cols[0].value, 5);
         callback();
       });
-    },
+    }
   ],
 
   function(err) {
@@ -278,7 +278,7 @@ exports.testConnectToBadUrl = function(test, assert) {
 exports.testConnectionKeyspaceDoesNotExistConnect = function(test, assert) {
   connect({keyspace: 'doesnotexist.'}, function(err, conn) {
     assert.ok(err);
-    assert.equal(err.name, 'NotFoundException')
+    assert.equal(err.name, 'NotFoundException');
     assert.equal(err.message, 'ColumnFamily or Keyspace does not exist');
     assert.ok(!conn);
     test.finish();
@@ -292,7 +292,7 @@ exports.testPooledConnectionKeyspaceDoesNotExistConnect = function(test, assert)
   con.execute('SELECT * FROM foo', [], function(err) {
     assert.ok(err);
     assert.equal(err.message, 'ColumnFamily or Keyspace does not exist');
-    assert.equal(err.name, 'NotFoundException')
+    assert.equal(err.name, 'NotFoundException');
     test.finish();
   });
 };
@@ -317,7 +317,7 @@ exports.testCounterUpdate = function(test, assert) {
                                     test.finish();
                                   } else {
                                     con.close();
-                                    assert.strictEqual(res1[0].colHash['a'].toString(), '3');
+                                    assert.strictEqual(res1[0].colHash.a.toString(), '3');
                                     test.finish();
                                   }
                                 });
@@ -474,7 +474,7 @@ exports.testBoolean = function(test, assert) {
   connect(function(err, con) {
     assert.ifError(err);
     var key = 'binarytest';
-    var booleanParams = [true, false, true]
+    var booleanParams = [true, false, true];
     con.execute('update CfBoolean set ?=? where key=?', booleanParams, function(updErr) {
       if (updErr) {
         con.close();
@@ -500,7 +500,7 @@ exports.testDate = function(test, assert) {
     assert.ifError(err);
     var key = 'binarytest';
       var now = new Date();
-      var dateParams = [now, now.getTime(), new Date(2021, 11, 11, 11, 11, 11, 111) ]
+      var dateParams = [now, now.getTime(), new Date(2021, 11, 11, 11, 11, 11, 111)];
     con.execute('update CfDate set ?=? where key=?', dateParams, function(updErr) {
       if (updErr) {
         con.close();
@@ -890,7 +890,7 @@ exports.testConnectionBindError = function(test, assert) {
       test.finish();
     });
   });
-}
+};
 
 exports.testPooledConnectionBindError = function(test, assert) {
   var hosts = ['127.0.0.1:9160'],
@@ -1075,7 +1075,7 @@ exports.testPooledConnection = function(test, assert) {
         if (err) { bail(conn, err); }
         assert.strictEqual(rows.rowCount(), 1);
         var row = rows[0];
-        assert.ok(metadata.connectionInfo)
+        assert.ok(metadata.connectionInfo);
         assert.strictEqual(row.cols[0].name.toString(), 'A');
         callback();
       });
