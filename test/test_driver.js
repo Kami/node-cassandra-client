@@ -1279,7 +1279,7 @@ exports.testPooledContainerImmediateShutdown = function(test, assert) {
   var hosts = ['127.0.0.1:9160'];
   var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1'});
 
-  pool.connect();
+  pool.connect(function () {});
   pool.shutdown(function(err) {
     assert.ifError(err);
     test.finish();
