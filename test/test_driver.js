@@ -859,7 +859,6 @@ exports.testReversedString = function(test, assert) {
   });
 };
 
-
 exports.testConnectionBindError = function(test, assert) {
   connect(function(err, con) {
     if (err) {
@@ -890,6 +889,34 @@ exports.testConnectionBindError = function(test, assert) {
       con.close();
       test.finish();
     });
+  });
+}
+
+exports.testPooledConnectionBindError = function(test, assert) {
+  var hosts = ['127.0.0.1:9160'],
+      conn = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', use_bigints: true});
+
+  async.series([
+    function testUndefinedParameter(callback) {
+      conn.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [undefined, 'aaa', 'missing_col_0'], function(err) {
+        assert.ok(err);
+        assert.strictEqual('null/undefined query parameter', err.message);
+        callback();
+      });
+    },
+
+    function testNullParameter(callback) {
+      conn.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [null, 'aaa', 'missing_col_0'], function(err) {
+        assert.ok(err);
+        assert.strictEqual('null/undefined query parameter', err.message);
+        callback();
+      });
+    }
+  ],
+
+  function(err) {
+    conn.shutdown();
+    test.finish();
   });
 };
 
