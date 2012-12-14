@@ -860,19 +860,36 @@ exports.testReversedString = function(test, assert) {
 };
 
 
-exports.testUndefinedParam = function(test, assert) {
+exports.testConnectionBindError = function(test, assert) {
   connect(function(err, con) {
     if (err) {
       assert.ok(false);
       test.finish();
-    } else {
-      con.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [undefined, 'aaa', 'missing_col_0'], function(err) {
-        con.close();
-        assert.ok(err);
-        assert.strictEqual('null/undefined query parameter', err.message);
-        test.finish();
-      });
+      return;
     }
+
+    async.series([
+      function testUndefinedParameter(callback) {
+        con.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [undefined, 'aaa', 'missing_col_0'], function(err) {
+          assert.ok(err);
+          assert.strictEqual('null/undefined query parameter', err.message);
+          callback();
+        });
+      },
+
+      function testNullParameter(callback) {
+        con.execute('UPDATE CfUtf8 SET ?=? WHERE KEY=?', [null, 'aaa', 'missing_col_0'], function(err) {
+          assert.ok(err);
+          assert.strictEqual('null/undefined query parameter', err.message);
+          callback();
+        });
+      }
+    ],
+
+    function(err) {
+      con.close();
+      test.finish();
+    });
   });
 };
 
