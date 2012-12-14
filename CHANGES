@@ -1,4 +1,4 @@
-Changes with cassandra-client in 0.12.0
+Changes with cassandra-client in development
 
 - Fix a bug when an invalid parameter passed to PooledConnection.execute method
   would cause connection pool to invalidly be exhausted instead of passing error
