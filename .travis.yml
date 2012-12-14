@@ -7,7 +7,9 @@ before_install:
   - sudo service cassandra start
   - sleep 5
 
-script: npm run-script test
+script: 
+  - npm run-script lint
+  - npm run-script test
 
 notifications:
   email:
