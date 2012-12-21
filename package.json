@@ -10,7 +10,7 @@
   ],
   "name": "cassandra-client",
   "description": "Node.js CQL driver for Apache Cassandra",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "homepage": "http://code.google.com/a/apache-extras.org/p/cassandra-node/",
   "repository": {
     "type": "git",
