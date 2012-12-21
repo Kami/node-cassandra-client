@@ -130,9 +130,9 @@ exports.setUp = function(test, assert) {
       var cfCounter = new CfDef({keyspace: ksName, name: 'CfCounter', column_type: 'Standard', comparator_type: 'AsciiType', default_validation_class: 'CounterColumnType', key_validation_class: 'AsciiType'});
       var super1 = new CfDef({keyspace: ksName, name: 'Super1', column_type: 'Super', comparator_type: 'UTF8Type', subcomparator_type: 'UTF8Type'});
       var cfReversed = new CfDef({keyspace: ksName, name: 'CfReversed1', column_type: 'Standard', comparator_type: 'UTF8Type(reversed=true)', default_validation_class: 'UTF8Type', key_validation_class: 'UTF8Type'});
-      var keyspace1 = new KsDef({name: ksName, 
+      var keyspace1 = new KsDef({name: ksName,
                                  strategy_class: 'org.apache.cassandra.locator.SimpleStrategy',
-                                 strategy_options: {'replication_factor': '1'}, 
+                                 strategy_options: {'replication_factor': '1'},
                                  cf_defs: [standard1, super1, cfInt, cfUtf8, cfLong, cfBytes, cfBoolean, cfDate, cfUuid, cfUgly, cfCounter, cfReversed]});
       sys.addKeyspace(keyspace1, function(addErr) {
         console.log(addErr);
@@ -1269,6 +1269,29 @@ exports.testPooledConnectionShutdownTwice = function(test, assert) {
   });
 };
 
+exports.testThriftConnectionErrorIsProperlyPropagated = function(test, assert) {
+  async.waterfall([
+    connect,
+
+    function executeQueryAndEmitMockError(con, callback) {
+      con.execute('SELECT ""."" FROM Keyspace1', [], function(err, res) {
+        assert.ok(err);
+        assert.equal(err.message, 'mock error');
+        callback(null, con);
+      });
+
+      con.con.emit('error', new Error('mock error'));
+    }
+  ],
+
+  function(err, con) {
+    if (con) {
+      con.close();
+    }
+
+    test.finish();
+  });
+};
 
 exports.testPooledContainerImmediateShutdown = function(test, assert) {
   var hosts = ['127.0.0.1:9160'];
