@@ -1,8 +1,12 @@
-Changes with cassandra-client in development
+Changes with cassandra-client 0.13.0
 
 - Fix a bug when an invalid parameter passed to PooledConnection.execute method
   would cause connection pool to invalidly be exhausted instead of passing error
   directly back to the user.
+
+- Fix a bug with incorrectly waiting for a query timeout instead of imediatelly
+  calling 'Connection.execute' callback if an 'error' event was emitted on a
+  Thrift connection.
 
 Changes with cassandra-client 0.12.0
 
