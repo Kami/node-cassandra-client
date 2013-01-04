@@ -1,3 +1,9 @@
+Changes with cassandra-client 0.14.0
+
+- Bump required thrift version to 0.7.0
+
+- Log the right timeout when a query takes too long.
+
 Changes with cassandra-client 0.13.0
 
 - Fix a bug when an invalid parameter passed to PooledConnection.execute method
