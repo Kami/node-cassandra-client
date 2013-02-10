@@ -1,3 +1,19 @@
+Changes with cassandra-client in development
+
+- Include regenerated Thrift definition files to client works with
+  Cassandra 1.2
+
+- Allow user to specify used CQL version by passing 'cql_version' attribute to
+  the Connection / PooledConnection constructor. Valid options are '2.0.0' and
+  '3.0.0'.
+
+  This option is here to make porting applications to Cassandra 1.2 easier.
+  Cassandra 1.2 defaults to CQL version 3 which means you need to set
+  'cql_version' to '2.0.0' if you want run your queries in CQL 2 compatibility
+  mode.
+
+  Note: Setting CQL version is only available in Cassandra >= 1.1.
+
 Changes with cassandra-client 0.14.0
 
 - Bump required thrift version to 0.7.0
