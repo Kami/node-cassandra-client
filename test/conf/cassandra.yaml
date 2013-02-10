@@ -16,7 +16,6 @@ encryption_options: {internode_encryption: none, keystore: conf/.keystore, keyst
 endpoint_snitch: org.apache.cassandra.locator.SimpleSnitch
 flush_largest_memtables_at: 0.75
 hinted_handoff_enabled: false
-hinted_handoff_throttle_delay_in_ms: 50
 in_memory_compaction_limit_in_mb: 64
 incremental_backups: false
 index_interval: 128
@@ -31,7 +30,6 @@ request_scheduler: org.apache.cassandra.scheduler.NoScheduler
 rpc_address: 127.0.0.1
 rpc_keepalive: true
 rpc_port: 9160
-rpc_timeout_in_ms: 10000
 saved_caches_directory: [/tmp/cass/savedcaches]
 seed_provider:
 - class_name: org.apache.cassandra.locator.SimpleSeedProvider
