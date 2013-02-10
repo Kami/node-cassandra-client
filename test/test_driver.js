@@ -1303,3 +1303,40 @@ exports.testPooledContainerImmediateShutdown = function(test, assert) {
     test.finish();
   });
 };
+
+exports.testConnectionInvalidCqlVersionConnectionAttribute = function(test, assert) {
+  var host = '127.0.0.1', port = 9160;
+  var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
+
+  conn.connect(function(err) {
+    assert.ok(err);
+    assert.equal(err.name, 'InvalidRequestException');
+    assert.match(err.message, /Provided version .*? is not supported/i);
+    test.finish();
+  });
+};
+
+exports.testPooledConnectionInvalidCqlVersionConnectionAttribute = function(test, assert) {
+  var hosts = ['127.0.0.1:9160'];
+  var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
+
+  pool.connect(function(err) {
+    assert.ok(err);
+    assert.equal(err._individualErrors[0].name, 'InvalidRequestException');
+    assert.match(err._individualErrors[0].message, /Provided version .*? is not supported/i);
+    test.finish();
+  });
+};
+
+exports.testConnectionValidCqlVersionConnectionAttribute = function(test, assert) {
+  var host = '127.0.0.1', port = 9160;
+  var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1', 'cql_version': '2.0.0'});
+
+  conn.connect(function(err) {
+    assert.ifError(err);
+
+    conn.close(function() {
+      test.finish();
+    });
+  });
+};
