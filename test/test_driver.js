@@ -1308,7 +1308,7 @@ exports.testConnectionInvalidCqlVersionConnectionAttribute = function(test, asse
   var host = '127.0.0.1', port = 9160;
   var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
 
-  if (process.env['TRAVIS']) {
+  if (process.env.TRAVIS) {
     test.skip('travis-ci doesn\'t appear to be running 1.1 or 1.2');
     return;
   }
@@ -1325,7 +1325,7 @@ exports.testPooledConnectionInvalidCqlVersionConnectionAttribute = function(test
   var hosts = ['127.0.0.1:9160'];
   var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
 
-  if (process.env['TRAVIS']) {
+  if (process.env.TRAVIS) {
     test.skip('travis-ci doesn\'t appear to be running 1.1 or 1.2');
     return;
   }
@@ -1342,7 +1342,7 @@ exports.testConnectionValidCqlVersionConnectionAttribute = function(test, assert
   var host = '127.0.0.1', port = 9160;
   var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1', 'cql_version': '2.0.0'});
 
-  if (process.env['TRAVIS']) {
+  if (process.env.TRAVIS) {
     test.skip('travis-ci doesn\'t appear to be running 1.1 or 1.2');
     return;
   }
