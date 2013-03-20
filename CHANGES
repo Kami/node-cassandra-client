@@ -1,4 +1,9 @@
-Changes with cassandra-client in development
+Changes with cassandra-client 0.14.2
+
+- Include 'connectionInfo' attribute with every log message which is tied to a
+  Cassandra connection. (#66)
+
+Changes with cassandra-client 0.14.1
 
 - Include regenerated Thrift definition files to client works with
   Cassandra 1.2
