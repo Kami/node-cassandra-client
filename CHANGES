@@ -1,3 +1,8 @@
+Changes with cassandra-client 0.14.3
+
+- Pass an error to the Connection.excute callback if column family which is
+  returned in the result is missing validator definitions.
+
 Changes with cassandra-client 0.14.2
 
 - Include 'connectionInfo' attribute with every log message which is tied to a
