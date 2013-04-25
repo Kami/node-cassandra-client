@@ -154,6 +154,18 @@ Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and em
 
 The `level` being passed to the listener can be one of `debug`, `info`, `warn`, `error`, `timing` and `cql`. The `message` is a string and `obj` is an object that provides more detailed information.
 
+Regenerating Thrift Definition Files
+====================================
+
+To regenerate Thrift definition files you need to have thrift compiler
+installed. You can find information on how to do that on the
+[Thrift website](http://thrift.apache.org/docs/install/).
+
+```bash
+git clone git://github.com/apache/cassandra.git
+cd cassandra/interface
+thrift --gen js:node cassandra.thrift
+```
 
 Things you should know about
 ============================
