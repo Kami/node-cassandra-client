@@ -10,11 +10,19 @@ Installation
 ====================
 
     $ npm install cassandra-client
-    
+
 Build status
 ====================
 
 [![Build Status](https://secure.travis-ci.org/racker/node-cassandra-client.png)](http://travis-ci.org/racker/node-cassandra-client)
+
+Running Tests and Lint
+======================
+
+```bash
+npm run-script test
+npm run-script lint
+```
 
 License
 ====================
@@ -39,7 +47,7 @@ Using It
         // assume ksDef contains a full description of the keyspace (uses the thrift structure).
       }
     });
-    
+
 ### Create a keyspace
     sys.addKeyspace(ksDef, function(err) {
       if (err) {
@@ -48,7 +56,7 @@ Using It
         // keyspace was successfully created.
       }
     });
-    
+
 ### Updating
 This example assumes you have strings for keys, column names and values:
 
@@ -60,8 +68,8 @@ This example assumes you have strings for keys, column names and values:
         } else {
             // handle success.
         }
-	});
-	
+  });
+
 The `Connection` constructor accepts the following properties:
 
     host:        cassandra host
@@ -77,19 +85,19 @@ The `Connection` constructor accepts the following properties:
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
 Assume the updates have happened previously.
 
-	con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
-		if (err) {
-			// handle error
-		} else {
-			console.log(rows.rowCount());
-			console.log(rows[0]);
+  con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
+    if (err) {
+      // handle error
+    } else {
+      console.log(rows.rowCount());
+      console.log(rows[0]);
                         assert.strictEqual(rows[0].colCount(), 1);
                         assert.ok(rows[0].colHash['cola']);
                         assert.ok(rows[0].cols[0].name === 'cola');
                         assert.ok(rows[0].cols[0].value === 'valuea');
-		}
-	});
-	
+    }
+  });
+
 ### Pooled Connections
     // Creating a new connection pool.
     var PooledConnection = require('cassandra-client').PooledConnection;
@@ -119,7 +127,7 @@ Queries are performed using the `execute()` method in the same manner as `Connec
         else console.log("success");
       }
     );
-    
+
     // Reading
     connection_pool.execute('SELECT ? FROM Standard1 WHERE KEY=?', ['A', 'K'],
       function(err, row) {
@@ -129,7 +137,7 @@ Queries are performed using the `execute()` method in the same manner as `Connec
     );
 
 When you are finished with a `PooledConnection` instance, call `shutdown(callback)`.
-Shutting down the pool prevents further work from being enqueued, and closes all 
+Shutting down the pool prevents further work from being enqueued, and closes all
 open connections after pending requests are complete.
 
     // Shutting down a pool
@@ -146,6 +154,18 @@ Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and em
 
 The `level` being passed to the listener can be one of `debug`, `info`, `warn`, `error`, `timing` and `cql`. The `message` is a string and `obj` is an object that provides more detailed information.
 
+Regenerating Thrift Definition Files
+====================================
+
+To regenerate Thrift definition files you need to have thrift compiler
+installed. You can find information on how to do that on the
+[Thrift website](http://thrift.apache.org/docs/install/).
+
+```bash
+git clone git://github.com/apache/cassandra.git
+cd cassandra/interface
+thrift --gen js:node cassandra.thrift
+```
 
 Things you should know about
 ============================
@@ -155,7 +175,7 @@ Therefore all numbers returned in queries are BigIntegers.  This means that you 
 do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
 
 ### Decoding
-node-cassandra-client supports Cassandra `BytesType`, `IntegerType`, `LongTime` and `TimeUUIDType` out of the box.  
+node-cassandra-client supports Cassandra `BytesType`, `IntegerType`, `LongTime` and `TimeUUIDType` out of the box.
 When dealing with numbers, the values you retreive out of rows will all be `BigInteger`s (be wary of losing precision
 if your numbers are bigger than 2^53--you know, like a timestamp).
 
