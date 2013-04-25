@@ -16,6 +16,14 @@ Build status
 
 [![Build Status](https://secure.travis-ci.org/racker/node-cassandra-client.png)](http://travis-ci.org/racker/node-cassandra-client)
 
+Running Tests and Lint
+======================
+
+```bash
+npm run-script test
+npm run-script lint
+```
+
 License
 ====================
 
@@ -60,7 +68,7 @@ This example assumes you have strings for keys, column names and values:
         } else {
             // handle success.
         }
-	});
+  });
 
 The `Connection` constructor accepts the following properties:
 
@@ -77,18 +85,18 @@ The `Connection` constructor accepts the following properties:
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
 Assume the updates have happened previously.
 
-	con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
-		if (err) {
-			// handle error
-		} else {
-			console.log(rows.rowCount());
-			console.log(rows[0]);
+  con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
+    if (err) {
+      // handle error
+    } else {
+      console.log(rows.rowCount());
+      console.log(rows[0]);
                         assert.strictEqual(rows[0].colCount(), 1);
                         assert.ok(rows[0].colHash['cola']);
                         assert.ok(rows[0].cols[0].name === 'cola');
                         assert.ok(rows[0].cols[0].value === 'valuea');
-		}
-	});
+    }
+  });
 
 ### Pooled Connections
     // Creating a new connection pool.
