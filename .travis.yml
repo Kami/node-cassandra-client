@@ -4,12 +4,9 @@ node_js:
   - 0.6
   - 0.8
 
-services:
-  - cassandra
-
-before_script:
+before_install:
+  - sudo service cassandra start
   - sleep 5
-  - 'CASSANDRA_CONF=/etc/cassandra /usr/local/cassandra/bin/nodetool status'
 
 script: 
   - npm run-script lint
