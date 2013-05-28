@@ -5,6 +5,34 @@ node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache C
 CQL is a query language for Apache Cassandra.  You use it in much the same way you would use SQL for a relational database.
 The Cassandra [documentation](http://www.datastax.com/docs/1.0/references/cql/index) can help you learn the syntax.
 
+## node-cassandra-client and Apache Cassandra 1.2.x
+
+Since `0.14.1`, the client supports Apache Cassandra 1.2.x in CQL 2
+compatibility mode.
+
+By default Cassandra 1.2.x uses CQL 3 so you need to turn the CQL 2
+compatibility mode on by passing `'cql_version': '2.0.0'` attribute to
+`Connection` / `PooledConnection` constructor in the options object.
+
+For example:
+
+```javascript
+var conn = new Connection({'host': host, 'port': port, 'keyspace': 'Keyspace1', 'cql_version': '2.0.0'});
+var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
+```
+
+### Creating column families using cqlsh
+
+If you use `cqlsh` which ships with Cassandra 1.2.x or a newer version of
+`cqlsh` which defaults to CQL 3 you need to pass `-2` argument to it, otherwise
+the client won't be able to read column family definitions (#67).
+
+For example:
+
+```bash
+cqlsh -2 localhost 9160 < my_file.cql
+```
+
 ## Installation
 
     $ npm install cassandra-client
