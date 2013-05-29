@@ -1,31 +1,58 @@
-node-cassandra-client
-====================
+# node-cassandra-client
 
 node-cassandra-client is a [Node.js](http://nodejs.org) CQL driver for [Apache Cassandra](http://cassandra.apache.org) 0.8 and later.
 
 CQL is a query language for Apache Cassandra.  You use it in much the same way you would use SQL for a relational database.
 The Cassandra [documentation](http://www.datastax.com/docs/1.0/references/cql/index) can help you learn the syntax.
 
-Installation
-====================
+## node-cassandra-client and Apache Cassandra 1.2.x
+
+Since `0.14.1`, the client supports Apache Cassandra 1.2.x in CQL 2
+compatibility mode.
+
+By default Cassandra 1.2.x uses CQL 3 so you need to turn the CQL 2
+compatibility mode on by passing `'cql_version': '2.0.0'` attribute to
+`Connection` / `PooledConnection` constructor in the options object.
+
+Explicitly setting CQL version on a connection is only supported from
+Apache Cassandra 1.1 and above so you should only set it if you are
+using version 1.1 or above.
+
+For example:
+
+```javascript
+var conn = new Connection({'host': host, 'port': port, 'keyspace': 'Keyspace1', 'cql_version': '2.0.0'});
+var pool = new PooledConnection({'hosts': hosts, 'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
+```
+
+### Creating column families using cqlsh
+
+If you use `cqlsh` which ships with Cassandra 1.2.x or a newer version of
+`cqlsh` which defaults to CQL 3 you need to pass `-2` argument to it, otherwise
+the client won't be able to read column family definitions (#67).
+
+For example:
+
+```bash
+cqlsh -2 localhost 9160 < my_file.cql
+```
+
+## Installation
 
     $ npm install cassandra-client
 
-Build status
-====================
+## Build status
 
 [![Build Status](https://secure.travis-ci.org/racker/node-cassandra-client.png)](http://travis-ci.org/racker/node-cassandra-client)
 
-Running Tests and Lint
-======================
+## Running Tests and Lint
 
 ```bash
 npm run-script test
 npm run-script lint
 ```
 
-License
-====================
+## License
 
 node-cassandra-client is distributed under the [Apache license](http://www.apache.org/licenses/LICENSE-2.0.html).
 
@@ -33,8 +60,7 @@ node-cassandra-client is distributed under the [Apache license](http://www.apach
 from the Node.js source (which comes from the [V8](http://code.google.com/p/v8/) source).
 
 
-Using It
-====================
+## Using It
 
 ### Access the System keyspace
     var System = require('cassandra-client').System;
@@ -82,6 +108,7 @@ The `Connection` constructor accepts the following properties:
     log_time:    [optional] boolean. Log execution time for all the queries.
 
 ### Getting data
+
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
 Assume the updates have happened previously.
 
@@ -144,6 +171,7 @@ open connections after pending requests are complete.
     connection_pool.shutdown(function() { console.log("connection pool shutdown"); });
 
 ### Logging
+
 Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and emit `log` events:
 
     var Connection = require('cassandra-client').Connection;
@@ -154,8 +182,7 @@ Instances of `Connection()` and `PooledConnection()` are `EventEmitter`'s and em
 
 The `level` being passed to the listener can be one of `debug`, `info`, `warn`, `error`, `timing` and `cql`. The `message` is a string and `obj` is an object that provides more detailed information.
 
-Regenerating Thrift Definition Files
-====================================
+## Regenerating Thrift Definition Files
 
 To regenerate Thrift definition files you need to have thrift compiler
 installed. You can find information on how to do that on the
@@ -167,14 +194,16 @@ cd cassandra/interface
 thrift --gen js:node cassandra.thrift
 ```
 
-Things you should know about
-============================
+## Things you should know about
+
 ### Numbers
+
 The Javascript Number type doesn't match up well with the java longs and integers stored in Cassandra.
 Therefore all numbers returned in queries are BigIntegers.  This means that you need to be careful when you
 do updates.  If you're worried about losing precision, specify your numbers as strings and use the BigInteger library.
 
 ### Decoding
+
 node-cassandra-client supports Cassandra `BytesType`, `IntegerType`, `LongTime` and `TimeUUIDType` out of the box.
 When dealing with numbers, the values you retreive out of rows will all be `BigInteger`s (be wary of losing precision
 if your numbers are bigger than 2^53--you know, like a timestamp).
@@ -184,4 +213,5 @@ if your numbers are bigger than 2^53--you know, like a timestamp).
 We technically have a [UUID type](https://github.com/racker/node-cassandra-client/blob/master/lib/uuid.js), but have not had the need to flesh it out yet.  If you find the need to expose more parts of the UUID (timestamp, node, clock sequence, etc.), or would like to implement some operations, patches are welcome.
 
 ### Todo
+
 * Full BigInteger documentation.
