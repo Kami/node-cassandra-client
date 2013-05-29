@@ -14,6 +14,10 @@ By default Cassandra 1.2.x uses CQL 3 so you need to turn the CQL 2
 compatibility mode on by passing `'cql_version': '2.0.0'` attribute to
 `Connection` / `PooledConnection` constructor in the options object.
 
+Explicitly setting CQL version on a connection is only supported from
+Apache Cassandra 1.1 and above so you should only set it if you are
+using version 1.1 or above.
+
 For example:
 
 ```javascript
