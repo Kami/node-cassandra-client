@@ -379,6 +379,37 @@ exports.testSimpleDelete = function(test, assert) {
   });
 };
 
+exports.testSelectValueless = function(test, assert) {
+  connect(function(err, con) {
+    if (err) {
+      assert.ok(false);
+      test.finish();
+    } else {
+      var key = stringToHex('key9');
+      con.execute('update Standard1 set ?=? where key=?', ['colx', '', key], function(updateErr) {
+        if (updateErr) {
+          con.close();
+          assert.ok(false);
+          test.finish();
+        } else {
+          con.execute('select ?,?,? from Standard1 where key=?', ['cola', 'colx', 'colz', key], function(selErr, rows) {
+            con.close();
+
+            assert.ifError(selErr);
+            assert.strictEqual(rows.rowCount(), 1);
+
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(row.colHash.colx, '');
+
+            test.finish();
+          });
+        }
+      });
+    }
+  });
+};
+
 exports.testLongNoBigint = function(test, assert) {
   connect(function(err, con) {
     if (err) {
