@@ -392,16 +392,16 @@ exports.testSelectValueless = function(test, assert) {
           assert.ok(false);
           test.finish();
         } else {
-          con.execute('select ?,?,? from Standard1 where key=?', ['mmmm','colx', 'colz', key], function(selErr, rows) {
+          con.execute('select ?,?,? from Standard1 where key=?', ['cola', 'colx', 'colz', key], function(selErr, rows) {
             con.close();
-            if (selErr) {
-              assert.ok(false);
-            } else {
-              assert.strictEqual(rows.rowCount(), 1);
-              var row = rows[0];
-              assert.strictEqual(1, row.colCount());
-              assert.strictEqual(row.colHash.colx, '');
-            }
+
+            assert.ifError(selErr);
+            assert.strictEqual(rows.rowCount(), 1);
+
+            var row = rows[0];
+            assert.strictEqual(1, row.colCount());
+            assert.strictEqual(row.colHash.colx, '');
+
             test.finish();
           });
         }
