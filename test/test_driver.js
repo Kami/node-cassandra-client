@@ -360,7 +360,7 @@ exports.testSimpleDelete = function(test, assert) {
               assert.ok(false);
               test.finish();
             } else {
-              con.execute('select ?,?,? from Standard1 where key=?', ['mmmm','colx', 'colz', key], function(selErr, rows) {
+              con.execute('select ?,? from Standard1 where key=?', ['colx', 'colz', key], function(selErr, rows) {
                 con.close();
                 if (selErr) {
                   assert.ok(false);
