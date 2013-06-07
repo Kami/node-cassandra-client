@@ -10,4 +10,4 @@ fi
 
 NODE_PATH=lib node_modules/whiskey/bin/whiskey \
   --tests "${TEST_FILES}" \
-  ${dependencies} --real-time --scope-leaks --timeout 30000
+  ${dependencies} --real-time --scope-leaks --timeout 45000
