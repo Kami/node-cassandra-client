@@ -400,6 +400,7 @@ exports.testSelectValueless = function(test, assert) {
               assert.strictEqual(rows.rowCount(), 1);
               var row = rows[0];
               assert.strictEqual(1, row.colCount());
+              assert.strictEqual(row.colHash.colx, '');
             }
             test.finish();
           });
