@@ -1,4 +1,4 @@
-Changes with cassandra-client in development
+Changes with cassandra-client 0.14.4
 
 - Include columns with empty string value ('') in the result set. #71
   [Sven Krasser]
