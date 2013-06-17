@@ -1,3 +1,7 @@
+Changes with cassandra-client 0.14.5
+
+- Don't call close on self.con inside Connection.close if con is not set. #72
+
 Changes with cassandra-client 0.14.4
 
 - Include columns with empty string value ('') in the result set. #71
