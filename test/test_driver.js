@@ -1335,6 +1335,15 @@ exports.testPooledContainerImmediateShutdown = function(test, assert) {
   });
 };
 
+exports.testCallCloseOnNonOpenConnection = function(test, assert) {
+  var host = '127.0.0.1', port = 9160;
+  var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1'});
+
+  // Should be a no-op
+  conn.close();
+  test.finish();
+};
+
 exports.testConnectionInvalidCqlVersionConnectionAttribute = function(test, assert) {
   var host = '127.0.0.1', port = 9160;
   var conn = new Connection({'host': host, 'port': port,'keyspace': 'Keyspace1', 'cql_version': '7.1.5'});
