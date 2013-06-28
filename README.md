@@ -112,6 +112,7 @@ The `Connection` constructor accepts the following properties:
 **NOTE:** You'll only get ordered and meaningful results if you are using an order-preserving partitioner.
 Assume the updates have happened previously.
 
+```javascript
   con.execute('SELECT ? FROM Standard1 WHERE key >= ? and key <= ?', ['cola', 'key0', 'key1'], function (err, rows) {
     if (err) {
       // handle error
@@ -124,6 +125,7 @@ Assume the updates have happened previously.
                         assert.ok(rows[0].cols[0].value === 'valuea');
     }
   });
+```
 
 ### Pooled Connections
     // Creating a new connection pool.
