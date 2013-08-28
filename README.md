@@ -88,13 +88,20 @@ This example assumes you have strings for keys, column names and values:
 
     var Connection = require('cassandra-client').Connection;
     var con = new Connection({host:'cassandra-host', port:9160, keyspace:'Keyspace1', user:'user', pass:'password'});
-    con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
-        if (err) {
-            // handle error
-        } else {
-            // handle success.
-        }
-  });
+    con.connect(function(err, con) {
+      if (err) {
+        // Failed to establish connection.
+        throw err;
+      }
+
+      con.execute('UPDATE Standard1 SET ?=? WHERE key=?', ['cola', 'valuea', 'key0'], function(err) {
+          if (err) {
+              // handle error
+          } else {
+              // handle success.
+          }
+      });
+    });
 
 The `Connection` constructor accepts the following properties:
 
