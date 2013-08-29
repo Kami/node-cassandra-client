@@ -1,3 +1,7 @@
+Changes with cassandra-client 0.14.7:
+
+- Fix connection race. (#75)
+
 Changes with cassandra-client 0.14.6:
 
 - Depend on thrift <= 0.9.0.
