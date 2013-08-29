@@ -1,3 +1,7 @@
+Changes with cassandra-client 0.14.6:
+
+- Depend on thrift <= 0.9.0.
+
 Changes with cassandra-client 0.14.5
 
 - Don't call close on self.con inside Connection.close if con is not set. #72
